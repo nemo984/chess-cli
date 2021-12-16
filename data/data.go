@@ -3,6 +3,8 @@ package data
 import (
 	"database/sql"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB;
@@ -18,7 +20,7 @@ func OpenDatabase() error {
 }
 
 func CreateTable() {
-	createTableSQL := `CREATE TABLE IF NOT EXISTS games(
+	createTableSQL := `CREATE TABLE IF NOT EXISTS games (
 		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"color" TEXT,
 		"engine" TEXT,
@@ -27,7 +29,7 @@ func CreateTable() {
 		"isWon" BOOLEAN,
 		"isCheckmate" BOOLEAN,
 		"isStalemate" BOOLEAN,
-		"pgn" TEXT,
+		"pgn" TEXT
 	);`
 
 	statement, err :=  db.Prepare(createTableSQL)

@@ -7,7 +7,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/nemo984/chess-cli/chess"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // playCmd represents the play command
@@ -21,20 +23,36 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("play called")
+		startNewGame()
+		fmt.Println(Level);
+		chess.StartGame(Level)
 	},
+
 }
+
+type promptContent struct {
+	errorMsg string
+	label string
+}
+
+
+
+var Level int;
 
 func init() {
 	rootCmd.AddCommand(playCmd)
+	playCmd.Flags().IntVar(&Level, "level", 1, "Computer difficulty level")
+	viper.BindPFlag("level", rootCmd.Flags().Lookup("level"))
+}
 
-	// Here you will define your flags and configuration settings.
+// func promptGetInput(pc promptContent) string {
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// playCmd.PersistentFlags().String("foo", "", "A help for foo")
+// }
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// playCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+// func promptGetSelect(pc promptContent) string {
+
+// }
+
+func startNewGame() {
+	
 }
