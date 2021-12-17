@@ -7,22 +7,24 @@ import (
 	"github.com/notnil/chess"
 )
 
-
-
 var Game *chess.Game
 
-func StartGame(level int) {
-	Game = chess.NewGame()
+type playees []playee
 
-	engine := Engine{level : level, path: "D:/Programming/go-workspace/stockfish.exe"}
+type playee interface{
+	getMoveAndMove()
+}
+
+func StartGame(engine Engine) {
+	Game = chess.NewGame()
 	engine.setUp()
 	//TODO: func to set up who vs who, in this case player vs player
 	playees := playees{
 		Player{chess.White},
-		Player{chess.Black},
+		engine,
 	}
 
-	fmt.Println("Game started, Difficulty Level:",level)
+	fmt.Println("Game started")
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
 			fmt.Println(Game.Position().Board().Draw())
@@ -35,9 +37,4 @@ func StartGame(level int) {
 		}
 
     }
-}
-type playees []playee
-//am i shakespare?
-type playee interface{
-	getMoveAndMove()
 }

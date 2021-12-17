@@ -7,17 +7,18 @@ import (
 )
 
 type Engine struct {
-	level int
-	path  string
+	Path  string
 	eng   *uci.Engine
+	Nodes int
+	Depth int
 }
 
 func (e *Engine) setUp() {
-	eng, err := uci.New(e.path)
-	e.eng = eng
+	eng, err := uci.New(e.Path)
 	if err != nil {
 		panic(err)
 	}
+	e.eng = eng
 	// initialize uci with new game
 	if err := e.eng.Run(uci.CmdUCI, uci.CmdIsReady, uci.CmdUCINewGame); err != nil {
 		panic(err)
@@ -25,7 +26,13 @@ func (e *Engine) setUp() {
 }
 
 func (e Engine) getMoveAndMove() {
-	//TODO: generate move base on specified level
+	cmdPos := uci.CmdPosition{Position: Game.Position()}
+	cmdGo := uci.CmdGo{Depth: e.Depth, Nodes: e.Nodes}
+
+	if err := e.eng.Run(cmdPos, cmdGo); err != nil {
+		panic(err)
+	}
+
 	move := e.eng.SearchResults().BestMove
 	if err := Game.Move(move); err != nil {
 		panic(err)
