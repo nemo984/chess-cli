@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -22,14 +23,17 @@ func OpenDatabase() error {
 func CreateTable() {
 	createTableSQL := `CREATE TABLE IF NOT EXISTS games (
 		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		"gameName" TEXT,
 		"color" TEXT,
-		"engine" TEXT,
 		"computerColor"	TEXT,
-		"level" INTEGER,
-		"isWon" BOOLEAN,
-		"isCheckmate" BOOLEAN,
-		"isStalemate" BOOLEAN,
-		"pgn" TEXT
+		"colorTurn" TEXT,
+		"engine" TEXT,
+		"engineDepth" INT,
+		"engineNodes" INT,
+		"outcome" TEXT,
+		"pgn" TEXT,
+		"created" TEXT DEFAULT CURRENT_TIMESTAMP, 
+		"updated" TEXT
 	);`
 
 	statement, err :=  db.Prepare(createTableSQL)
@@ -39,4 +43,26 @@ func CreateTable() {
 
 	statement.Exec()
 	log.Println("Games table created")
+}
+
+func SaveGame(game Game) {
+	stmt, err := db.Prepare(`INSERT INTO games(gameName, color, computerColor,colorTurn,engine,engineDepth,engineNodes,outcome,pgn,updated) 
+							values(?,?,?,?,?,?,?,?,?,datetime('now'))`)
+	if err != nil {
+		log.Fatal(err.Error()) 
+	}
+	_, err = stmt.Exec(game.GameName, game.Color, game.ComputerColor, game.ColorTurn, game.Engine, game.EngineDepth, game.EngineDepth,game.Outcome,game.Pgn)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+}
+
+func DisplayGames() {
+	rows, err := db.Query(`SELECT * from games`)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	fmt.Println(rows)
+	rows.Close()
 }

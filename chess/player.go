@@ -7,13 +7,13 @@ import (
 )
 
 type Player struct {
-	color chess.Color
+	Color chess.Color
 }
 
 func (p Player) getMoveAndMove() {
 	var input string
 	for {
-		fmt.Printf("Enter Your Move (%v): ", p.color)
+		fmt.Printf("Enter Your Move (%v): ", p.Color)
 		fmt.Scanln(&input)
 		if err := Game.MoveStr(input); err != nil {
 			fmt.Println("Invalid Move, Try Again")
@@ -22,3 +22,8 @@ func (p Player) getMoveAndMove() {
 		}
 	}
 }
+
+func (p Player) resign() {
+	Game.Resign(p.Color)
+}
+

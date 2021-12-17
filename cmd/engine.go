@@ -5,9 +5,8 @@ Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/nemo984/chess-cli/chess"
+	"github.com/nemo984/chess-cli/data"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,7 +22,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(engine)
+		data.CreateTable()
 		chess.StartGame(engine)
 	},
 }
@@ -31,6 +30,7 @@ to quickly create a Cobra application.`,
 var engine chess.Engine
 
 func init() {
+
 	playCmd.AddCommand(engineCmd)
 	engineCmd.Flags().StringVarP(&engine.Path, "path", "p","", "Set the path where engine is stored")
 	viper.BindPFlag("path", rootCmd.Flags().Lookup("path"))

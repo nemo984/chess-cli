@@ -3,6 +3,7 @@ package chess
 import (
 	"fmt"
 
+	"github.com/notnil/chess"
 	"github.com/notnil/chess/uci"
 )
 
@@ -11,6 +12,7 @@ type Engine struct {
 	eng   *uci.Engine
 	Nodes int
 	Depth int
+	Color chess.Color
 }
 
 func (e *Engine) setUp() {
@@ -23,6 +25,10 @@ func (e *Engine) setUp() {
 	if err := e.eng.Run(uci.CmdUCI, uci.CmdIsReady, uci.CmdUCINewGame); err != nil {
 		panic(err)
 	}
+}
+
+func (e *Engine) setColor(color chess.Color) {
+	e.Color = color
 }
 
 func (e Engine) getMoveAndMove() {
