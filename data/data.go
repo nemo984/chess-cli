@@ -25,7 +25,7 @@ func CreateTable() {
 		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 		"gameName" TEXT,
 		"color" TEXT,
-		"computerColor"	TEXT,
+		"engineColor"	TEXT,
 		"colorTurn" TEXT,
 		"engine" TEXT,
 		"engineDepth" INT,
@@ -51,7 +51,7 @@ func SaveGame(game Game) {
 	if err != nil {
 		log.Fatal(err.Error()) 
 	}
-	_, err = stmt.Exec(game.GameName, game.Color, game.ComputerColor, game.ColorTurn, game.Engine, game.EngineDepth, game.EngineDepth,game.Outcome,game.Pgn)
+	_, err = stmt.Exec(game.GameName, game.Color, game.EngineColor, game.ColorTurn, game.Engine, game.EngineDepth, game.EngineDepth,game.Outcome,game.Pgn)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
