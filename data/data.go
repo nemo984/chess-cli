@@ -48,12 +48,9 @@ func CreateTable() {
 func SaveGame(game Game) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println(game)
-	stmt, err := db.Prepare(`INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,pgn,updated) 
-							values(?,?,?,?,?,?,?,?,?,datetime('now'))`)
-	if err != nil {
-		log.Fatal(err.Error()) 
-	}
-	_, err = stmt.Exec(game.GameName, game.Color, game.EngineColor, game.ColorTurn, game.Engine, game.EngineDepth, game.EngineDepth,game.Outcome,game.Pgn)
+	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,pgn,updated) 
+			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:pgn,datetime('now'))`
+	_, err := db.NamedExec(query, game)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
