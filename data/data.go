@@ -44,7 +44,7 @@ func CreateTable() {
 }
 
 
-func SaveGame(game Game) {
+func CreateGame(game Game) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println(game)
 	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,fen,updated) 

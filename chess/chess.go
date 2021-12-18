@@ -10,7 +10,7 @@ import (
 )
 
 var Game *chess.Game
-
+var gameName string
 
 type playee interface{
 	getMoveAndMove()
@@ -40,6 +40,7 @@ func ContinueGame(name string) {
 		log.Fatal(err.Error())
 	}
 	Game = chess.NewGame(fen)
+	gameName = game.GameName
 
 	player := Player{
 		Color: strColor(game.Color),
@@ -50,27 +51,32 @@ func ContinueGame(name string) {
 		Nodes: game.EngineNodes,
 		Color: strColor(game.EngineColor),
 	}
+	engine.setUp()
+
 	playees := []playee{
 		player,
 		engine,
 	}
-
-	engine.setUp()
+	//black to move - engine goes first
+	if strColor(game.ColorTurn) == chess.Black {
+		playees[0], playees[1] = playees[1], playees[0]
+	}
 	startGame(playees,player,engine)
 
 }
 
 
 func startGame(playees []playee,player Player,engine Engine) {
-	fmt.Println("Game started")
 	i := 0
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
 			fmt.Println(Game.Position().Board().Draw())
 			playee.getMoveAndMove()
+			fmt.Println(Game.Position().Board().Draw())
 			i++
-			if i > 4 {
-				saveGame(player,engine)
+			if i > 5 {
+				_,exists := data.GetGame(gameName)
+				saveGame(player,engine,exists)
 				os.Exit(0)
 			}
 			if Game.Outcome() != chess.NoOutcome {
@@ -84,20 +90,23 @@ func startGame(playees []playee,player Player,engine Engine) {
 }
 
 
-func saveGame(player Player, engine Engine) {
+func saveGame(player Player, engine Engine,update bool) {
 	game := data.Game{
 		Color: colorStr(player.Color),
-		GameName: "idkwhy",
+		GameName: "anotherone",
 		EngineColor: colorStr(engine.Color),
-		ColorTurn: Game.Position().Turn().String(),
+		ColorTurn: colorStr(Game.Position().Turn()),
 		Engine: engine.Path,
 		EngineDepth: engine.Depth,
 		EngineNodes: engine.Nodes,
 		Outcome: Game.Outcome().String(),
 		FEN: Game.FEN(),
 	}
-
-	data.SaveGame(game)
+	if update {
+		data.UpdateGame(game)
+	} else {
+		data.CreateGame(game)
+	}
 }
 
 func colorStr(color chess.Color) string {

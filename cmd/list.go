@@ -32,9 +32,9 @@ func displayGames() {
 		fmt.Println("No games found")
 	}
 	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
-	fmt.Fprintln(w, "Created\tUpdated\tName\tColor\tTurn\tStatus\tEngine\tDepth\tNodes\tPGN")
+	fmt.Fprintln(w, "Created\tUpdated\tName\tColor\tTurn\tStatus\tEngine\tDepth\tNodes")
 	for _,game := range games {
-		fmt.Fprintf(w, "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v",game.Created,game.Updated,game.GameName,game.Color,game.ColorTurn,game.Outcome,game.Engine,game.EngineDepth,game.EngineNodes,game.FEN)
+		fmt.Fprintf(w, "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v",game.Created,game.Updated,game.GameName,game.Color,game.ColorTurn,game.Outcome,game.Engine,game.EngineDepth,game.EngineNodes)
 	}
 	w.Flush()
 }
