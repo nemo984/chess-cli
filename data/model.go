@@ -1,13 +1,16 @@
 package data
 
 type Game struct {
-	GameName    string
-	Color       string
-	EngineColor string
-	ColorTurn   string
-	Engine      string
-	EngineDepth int
-	EngineNodes int
-	Outcome     string
-	Pgn         string
+	Id          int    `db:"id"`
+	GameName    string `db:"gameName"`
+	Color       string `db:"color"`
+	EngineColor string `db:"engineColor"`
+	ColorTurn   string `db:"colorTurn"`
+	Engine      string `db:"engine"`
+	EngineDepth int    `db:"engineDepth"`
+	EngineNodes int    `db:"engineNodes"`
+	Outcome     string `db:"outcome"`
+	Pgn         string `db:"pgn"`
+	Created     string `db:"created"`
+	Updated     string `db:"updated"`
 }

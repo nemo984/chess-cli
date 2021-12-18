@@ -1,42 +1,41 @@
 package data
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var db *sql.DB;
+var db *sqlx.DB;
 
 func OpenDatabase() error {
 	var err error;
 
-	db, err = sql.Open("sqlite3", "./sqlite-database.db")
+	db, err = sqlx.Open("sqlite3", "./sqlite-database.db")
 	if err != nil {
 		return err
 	}
 	return db.Ping()
 }
 
-func CreateTable() {
-	createTableSQL := `CREATE TABLE IF NOT EXISTS games (
-		"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-		"gameName" TEXT,
-		"color" TEXT,
-		"engineColor"	TEXT,
-		"colorTurn" TEXT,
-		"engine" TEXT,
-		"engineDepth" INT,
-		"engineNodes" INT,
-		"outcome" TEXT,
-		"pgn" TEXT,
-		"created" TEXT DEFAULT CURRENT_TIMESTAMP, 
-		"updated" TEXT
-	);`
+var schema = `CREATE TABLE IF NOT EXISTS games (
+	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	gameName TEXT,
+	color TEXT,
+	engineColor	TEXT,
+	colorTurn TEXT,
+	engine TEXT,
+	engineDepth INT,
+	engineNodes INT,
+	outcome TEXT,
+	pgn TEXT,
+	created TEXT DEFAULT CURRENT_TIMESTAMP, 
+	updated TEXT
+);`
 
-	statement, err :=  db.Prepare(createTableSQL)
+func CreateTable() {
+	statement, err :=  db.Prepare(schema)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -45,8 +44,11 @@ func CreateTable() {
 	log.Println("Games table created")
 }
 
+
 func SaveGame(game Game) {
-	stmt, err := db.Prepare(`INSERT INTO games(gameName, color, computerColor,colorTurn,engine,engineDepth,engineNodes,outcome,pgn,updated) 
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println(game)
+	stmt, err := db.Prepare(`INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,pgn,updated) 
 							values(?,?,?,?,?,?,?,?,?,datetime('now'))`)
 	if err != nil {
 		log.Fatal(err.Error()) 
@@ -58,11 +60,24 @@ func SaveGame(game Game) {
 
 }
 
-func DisplayGames() {
-	rows, err := db.Query(`SELECT * from games`)
+func GetGames() ([]Game,error) {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	games := []Game{}
+	err := db.Select(&games, "SELECT * FROM games")
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, err
 	}
-	fmt.Println(rows)
-	rows.Close()
+	return games,nil
 }
+
+// func GameExists(gameName string) bool {
+// 	stmt,err := db.Prepare("EXISTS(SELECT 1 FROM games WHERE gameName = ?)");
+// 	if err != nil {
+// 		log.Fatal(err.Error())
+// 	}
+// 	res,err := stmt.Exec(gameName)
+// 	if err != nil {
+// 		log.Fatal(err.Error())
+// 	}
+// 	fmt.Println(res)
+// }

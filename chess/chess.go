@@ -51,6 +51,7 @@ func saveGame(player Player, engine Engine) {
 	pgn := Game.String()
 	game := data.Game{
 		Color: player.Color.String(),
+		GameName: "idkwhy",
 		EngineColor: engine.Color.String(),
 		ColorTurn: Game.Position().Turn().String(),
 		Engine: engine.Path,
