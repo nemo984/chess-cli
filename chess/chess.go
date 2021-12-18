@@ -13,11 +13,12 @@ var Game *chess.Game
 var gameName string
 
 type playee interface{
-	getMoveAndMove()
+	getMoveAndMove() (exit bool)
 }
 
 func NewGame(engine Engine) {
 	Game = chess.NewGame()
+	gameName = "newName" //get game name from a flag
 	engine.setUp()
 	engine.setColor(chess.Black)
 	//TODO: func to choose color
@@ -35,6 +36,7 @@ func ContinueGame(name string) {
 		fmt.Println("Game doesn't exist")
 		os.Exit(0)
 	}
+	log.Println("Continue Game",game)
 	fen,err := chess.FEN(game.FEN)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -67,21 +69,18 @@ func ContinueGame(name string) {
 
 
 func startGame(playees []playee,player Player,engine Engine) {
-	i := 0
+	log.Println(playees)
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
 			fmt.Println(Game.Position().Board().Draw())
-			playee.getMoveAndMove()
+			exit := playee.getMoveAndMove()
 			fmt.Println(Game.Position().Board().Draw())
-			i++
-			if i > 5 {
+
+			if exit || Game.Outcome() != chess.NoOutcome  {
+				fmt.Println("Game Status: ",Game.Outcome(),Game.Method())
 				_,exists := data.GetGame(gameName)
 				saveGame(player,engine,exists)
-				os.Exit(0)
-			}
-			if Game.Outcome() != chess.NoOutcome {
-				fmt.Println("Game Over",Game.Outcome(),Game.Method())
-				fmt.Println(Game)
+				fmt.Println("Game",gameName,"Saved")
 				os.Exit(0)
 			}
 		}
@@ -93,13 +92,13 @@ func startGame(playees []playee,player Player,engine Engine) {
 func saveGame(player Player, engine Engine,update bool) {
 	game := data.Game{
 		Color: colorStr(player.Color),
-		GameName: "anotherone",
+		GameName: gameName,
 		EngineColor: colorStr(engine.Color),
 		ColorTurn: colorStr(Game.Position().Turn()),
 		Engine: engine.Path,
 		EngineDepth: engine.Depth,
 		EngineNodes: engine.Nodes,
-		Outcome: Game.Outcome().String(),
+		Outcome: Game.Method().String(),
 		FEN: Game.FEN(),
 	}
 	if update {

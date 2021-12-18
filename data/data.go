@@ -46,7 +46,7 @@ func CreateTable() {
 
 func CreateGame(game Game) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println(game)
+	log.Println("Create Game",game)
 	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,fen,updated) 
 			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:fen,datetime('now'))`
 	_, err := db.NamedExec(query, game)
@@ -57,11 +57,13 @@ func CreateGame(game Game) {
 
 func UpdateGame(game Game) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println(game)
-	db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
+	log.Println("Update game",game)
+	_,err := db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
 				colorTurn=:colorTurn, engine=:engine, engineDepth=:engineDepth, engineNodes=:engineNodes,
-				outcome=:outcome, fen=:fen, updated=datetime('now') WHERE id =:id`, game)
-
+				outcome=:outcome, fen=:fen, updated=datetime('now') WHERE gameName =:gameName`, game)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 } 
 
 func GetGame(name string) (Game,bool) {

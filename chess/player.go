@@ -10,15 +10,18 @@ type Player struct {
 	Color chess.Color
 }
 
-func (p Player) getMoveAndMove() {
+func (p Player) getMoveAndMove() (exit bool) {
 	var input string
 	for {
 		fmt.Printf("Enter Your Move (%v): ", p.Color)
 		fmt.Scanln(&input)
 		if err := Game.MoveStr(input); err != nil {
+			if input == "q" {
+				return true
+			}
 			fmt.Println("Invalid Move, Try Again")
 		} else {
-			break
+			return false
 		}
 	}
 }
