@@ -1,6 +1,7 @@
 package data
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -29,7 +30,7 @@ var schema = `CREATE TABLE IF NOT EXISTS games (
 	engineDepth INT,
 	engineNodes INT,
 	outcome TEXT,
-	pgn TEXT,
+	fen TEXT,
 	created TEXT DEFAULT CURRENT_TIMESTAMP, 
 	updated TEXT
 );`
@@ -39,22 +40,37 @@ func CreateTable() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 	statement.Exec()
-	log.Println("Games table created")
 }
 
 
 func SaveGame(game Game) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println(game)
-	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,pgn,updated) 
-			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:pgn,datetime('now'))`
+	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,fen,updated) 
+			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:fen,datetime('now'))`
 	_, err := db.NamedExec(query, game)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+}
 
+func UpdateGame(game Game) {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println(game)
+	db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
+				colorTurn=:colorTurn, engine=:engine, engineDepth=:engineDepth, engineNodes=:engineNodes,
+				outcome=:outcome, fen=:fen, updated=datetime('now') WHERE id =:id`, game)
+
+} 
+
+func GetGame(name string) (Game,bool) {
+	var game Game
+	err := db.Get(&game,"SELECT * FROM games WHERE gameName = ? LIMIT 1",name)
+	if err != nil || err == sql.ErrNoRows {
+		return game,false
+	}
+	return game,true
 }
 
 func GetGames() ([]Game,error) {
@@ -66,15 +82,3 @@ func GetGames() ([]Game,error) {
 	}
 	return games,nil
 }
-
-// func GameExists(gameName string) bool {
-// 	stmt,err := db.Prepare("EXISTS(SELECT 1 FROM games WHERE gameName = ?)");
-// 	if err != nil {
-// 		log.Fatal(err.Error())
-// 	}
-// 	res,err := stmt.Exec(gameName)
-// 	if err != nil {
-// 		log.Fatal(err.Error())
-// 	}
-// 	fmt.Println(res)
-// }

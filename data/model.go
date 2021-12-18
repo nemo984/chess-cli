@@ -10,7 +10,7 @@ type Game struct {
 	EngineDepth int    `db:"engineDepth"`
 	EngineNodes int    `db:"engineNodes"`
 	Outcome     string `db:"outcome"`
-	Pgn         string `db:"pgn"`
+	FEN         string `db:"fen"`
 	Created     string `db:"created"`
 	Updated     string `db:"updated"`
 }

@@ -2,6 +2,7 @@ package chess
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/nemo984/chess-cli/data"
@@ -15,7 +16,7 @@ type playee interface{
 	getMoveAndMove()
 }
 
-func StartGame(engine Engine) {
+func NewGame(engine Engine) {
 	Game = chess.NewGame()
 	engine.setUp()
 	engine.setColor(chess.Black)
@@ -25,7 +26,42 @@ func StartGame(engine Engine) {
 		player,
 		engine,
 	}
+	startGame(playees,player,engine)
+}
 
+func ContinueGame(name string) {
+	game,ok := data.GetGame(name)
+	if !ok {
+		fmt.Println("Game doesn't exist")
+		os.Exit(0)
+	}
+	fen,err := chess.FEN(game.FEN)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	Game = chess.NewGame(fen)
+
+	player := Player{
+		Color: strColor(game.Color),
+	}
+	engine := Engine{
+		Path: game.Engine,
+		Depth: game.EngineDepth,
+		Nodes: game.EngineNodes,
+		Color: strColor(game.EngineColor),
+	}
+	playees := []playee{
+		player,
+		engine,
+	}
+
+	engine.setUp()
+	startGame(playees,player,engine)
+
+}
+
+
+func startGame(playees []playee,player Player,engine Engine) {
 	fmt.Println("Game started")
 	i := 0
     for Game.Outcome() == chess.NoOutcome {
@@ -33,7 +69,7 @@ func StartGame(engine Engine) {
 			fmt.Println(Game.Position().Board().Draw())
 			playee.getMoveAndMove()
 			i++
-			if i == 3 {
+			if i > 4 {
 				saveGame(player,engine)
 				os.Exit(0)
 			}
@@ -47,19 +83,33 @@ func StartGame(engine Engine) {
     }
 }
 
+
 func saveGame(player Player, engine Engine) {
-	pgn := Game.String()
 	game := data.Game{
-		Color: player.Color.String(),
+		Color: colorStr(player.Color),
 		GameName: "idkwhy",
-		EngineColor: engine.Color.String(),
+		EngineColor: colorStr(engine.Color),
 		ColorTurn: Game.Position().Turn().String(),
 		Engine: engine.Path,
 		EngineDepth: engine.Depth,
 		EngineNodes: engine.Nodes,
 		Outcome: Game.Outcome().String(),
-		Pgn: pgn,
+		FEN: Game.FEN(),
 	}
 
 	data.SaveGame(game)
+}
+
+func colorStr(color chess.Color) string {
+	if color == chess.White {
+		return "White"
+	}
+	return "Black"
+}
+
+func strColor(color string) chess.Color {
+	if color == "White" {
+		return chess.White
+	}
+	return chess.Black
 }
