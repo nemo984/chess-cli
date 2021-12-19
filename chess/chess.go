@@ -7,12 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/nemo984/chess-cli/data"
 	"github.com/nemo984/chess-cli/models"
 	"github.com/notnil/chess"
 )
-
 
 
 var Game *chess.Game
@@ -43,6 +43,10 @@ func ContinueGame(name string) {
 		fmt.Println("Game doesn't exist")
 		os.Exit(0)
 	}
+	if c := gameContinuable(game); !c {
+		os.Exit(0)
+	}
+
 	log.Println("Continue Game",game)
 	fen,err := chess.FEN(game.FEN)
 	if err != nil {
@@ -50,16 +54,6 @@ func ContinueGame(name string) {
 	}
 	Game = chess.NewGame(fen)
 	_gameName = game.GameName
-
-	if Game.Outcome() != chess.NoOutcome {
-		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n",_gameName, Game.Outcome(), Game.Method()) 
-		lichessURL,err := lichessAnalysisURL(game.PGN)
-		if err != nil { //can't get lichess url
-			os.Exit(0) 
-		}
-		fmt.Printf("Analyze on lichess: %v\n", lichessURL)
-		os.Exit(0)
-	}
 
 	player := Player{
 		Color: strColor(game.Color),
@@ -112,7 +106,8 @@ func saveGame(player Player, engine Engine,update bool) {
 		Engine: engine.Path,
 		EngineDepth: engine.Depth,
 		EngineNodes: engine.Nodes,
-		Outcome: Game.Method().String(),
+		Outcome: Game.Outcome().String(),
+		Method: Game.Method().String(),
 		FEN: Game.FEN(),
 		PGN: Game.String(),
 	}
@@ -137,16 +132,33 @@ func strColor(color string) chess.Color {
 	return chess.Black
 }
 
+func gameContinuable(game models.Game) bool {
+	if game.Outcome != chess.NoOutcome.String() {
+		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n",game.GameName,game.Outcome,game.Method) 
+		lichessURL,err := lichessAnalysisURL(game.PGN)
+		if err != nil { //can't get lichess url
+			os.Exit(0) 
+		}
+		fmt.Printf("Analyze on lichess: %v\n", lichessURL)
+		return false
+	}
+	return true
+}
+
 func lichessAnalysisURL(pgn string) (string, error) {
 	url := "https://lichess.org/api/import"
-	values := map[string]string{"pgn": pgn}
+	values := map[string]string{"pgn": strings.TrimSpace(pgn)}
 	jsonValue, _ := json.Marshal(values)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
 	if err != nil {
 		return "",err
 	}
 	defer resp.Body.Close()
-	
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("Non-OK HTTP status: %v",resp.StatusCode)
+	}
+
 	j := struct {
 		ID string `json:"id"`
 		URL string `json:"url"`

@@ -39,8 +39,8 @@ type Game struct {
 func (g *Game) Insert(game models.Game) error {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println("Create Game",game)
-	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,fen,pgn,updated) 
-			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:fen,:pgn,datetime('now'))`
+	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,method,fen,pgn,updated) 
+			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:method,:fen,:pgn,datetime('now'))`
 	_, err := _db.NamedExec(query, game)
 	return err
 }
@@ -51,7 +51,7 @@ func (g *Game) Update(game models.Game) error {
 	log.Println("Update game",game)
 	_,err := _db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
 				colorTurn=:colorTurn, engine=:engine, engineDepth=:engineDepth, engineNodes=:engineNodes,
-				outcome=:outcome, fen=:fen, pgn=:pgn, updated=datetime('now') WHERE gameName =:gameName`, game)
+				outcome=:outcome, method=:method, fen=:fen, pgn=:pgn, updated=datetime('now') WHERE gameName =:gameName`, game)
 	return err
 } 
 

@@ -10,6 +10,7 @@ var GameSchema = `CREATE TABLE IF NOT EXISTS games (
 	engineDepth INT,
 	engineNodes INT,
 	outcome TEXT,
+	method TEXT,
 	fen TEXT,
 	pgn TEXT,
 	created TEXT DEFAULT CURRENT_TIMESTAMP, 
