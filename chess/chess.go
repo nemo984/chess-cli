@@ -11,9 +11,9 @@ import (
 
 	"github.com/nemo984/chess-cli/data"
 	"github.com/nemo984/chess-cli/models"
+	"github.com/nemo984/chess-cli/utils"
 	"github.com/notnil/chess"
 )
-
 
 var Game *chess.Game
 var gameDAO data.Game
@@ -43,7 +43,7 @@ func ContinueGame(name string) {
 		fmt.Println("Game doesn't exist")
 		os.Exit(0)
 	}
-	if c := gameContinuable(game); !c {
+	if c := GameContinuable(game); !c {
 		os.Exit(0)
 	}
 
@@ -56,13 +56,13 @@ func ContinueGame(name string) {
 	_gameName = game.GameName
 
 	player := Player{
-		Color: strColor(game.Color),
+		Color: utils.StrColor(game.Color),
 	}
 	engine := Engine{
 		Path: game.Engine,
 		Depth: game.EngineDepth,
 		Nodes: game.EngineNodes,
-		Color: strColor(game.EngineColor),
+		Color: utils.StrColor(game.EngineColor),
 	}
 	engine.setUp()
 
@@ -71,7 +71,7 @@ func ContinueGame(name string) {
 		engine,
 	}
 	//black to move - engine goes first
-	if strColor(game.ColorTurn) == chess.Black {
+	if utils.StrColor(game.ColorTurn) == chess.Black {
 		playees[0], playees[1] = playees[1], playees[0]
 	}
 	startGame(playees,player,engine)
@@ -99,10 +99,10 @@ func startGame(playees []playee,player Player,engine Engine) {
 
 func saveGame(player Player, engine Engine,update bool) {
 	game := models.Game{
-		Color: colorStr(player.Color),
+		Color: utils.ColorStr(player.Color),
 		GameName: _gameName,
-		EngineColor: colorStr(engine.Color),
-		ColorTurn: colorStr(Game.Position().Turn()),
+		EngineColor: utils.ColorStr(engine.Color),
+		ColorTurn: utils.ColorStr(Game.Position().Turn()),
 		Engine: engine.Path,
 		EngineDepth: engine.Depth,
 		EngineNodes: engine.Nodes,
@@ -118,28 +118,16 @@ func saveGame(player Player, engine Engine,update bool) {
 	}
 }
 
-func colorStr(color chess.Color) string {
-	if color == chess.White {
-		return "White"
-	}
-	return "Black"
-}
-
-func strColor(color string) chess.Color {
-	if color == "White" {
-		return chess.White
-	}
-	return chess.Black
-}
-
-func gameContinuable(game models.Game) bool {
+func GameContinuable(game models.Game) bool {
 	if game.Outcome != chess.NoOutcome.String() {
 		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n",game.GameName,game.Outcome,game.Method) 
 		lichessURL,err := lichessAnalysisURL(game.PGN)
-		if err != nil { //can't get lichess url
-			os.Exit(0) 
+		fmt.Print("Analyze on lichess: ")
+		if err != nil { 
+			fmt.Println("Can't get link,",err.Error())
+		} else {
+			fmt.Println(lichessURL)
 		}
-		fmt.Printf("Analyze on lichess: %v\n", lichessURL)
 		return false
 	}
 	return true

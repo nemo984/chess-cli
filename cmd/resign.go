@@ -7,7 +7,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"log"
 
+	"github.com/nemo984/chess-cli/chess"
 	"github.com/spf13/cobra"
 )
 
@@ -19,15 +21,23 @@ var resignCmd = &cobra.Command{
 		if len(args) < 1 {
 			return errors.New("requires a game name argument")
 		}
-		_,ok := gameDAO.GetByName(args[0])
+		game,ok := gameDAO.GetByName(args[0])
 		if !ok {
-			return errors.New("game with this name doesn't exist")
+			return fmt.Errorf("game \"%v\" doesn't exist",args[0])
+		}
+		if continuable := chess.GameContinuable(game); !continuable {
+			return fmt.Errorf("game \"%v\" is already over",args[0])
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("resign called")
-		//delete game
+		game,_ := gameDAO.GetByName(args[0])
+		game.Resign()
+		err := gameDAO.Update(game)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		fmt.Printf("You resigned on Game \"%v\" Status: %v, %v", game.GameName, game.Outcome, game.Method)
 	},
 }
 
