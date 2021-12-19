@@ -6,79 +6,69 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/nemo984/chess-cli/models"
 )
 
-var db *sqlx.DB;
+var _db *sqlx.DB;
 
 func OpenDatabase() error {
 	var err error;
 
-	db, err = sqlx.Open("sqlite3", "./sqlite-database.db")
+	_db, err = sqlx.Open("sqlite3", "./sqlite-database.db")
 	if err != nil {
 		return err
 	}
-	return db.Ping()
+	return _db.Ping()
 }
 
-var schema = `CREATE TABLE IF NOT EXISTS games (
-	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	gameName TEXT,
-	color TEXT,
-	engineColor	TEXT,
-	colorTurn TEXT,
-	engine TEXT,
-	engineDepth INT,
-	engineNodes INT,
-	outcome TEXT,
-	fen TEXT,
-	created TEXT DEFAULT CURRENT_TIMESTAMP, 
-	updated TEXT
-);`
-
 func CreateTable() {
-	statement, err :=  db.Prepare(schema)
+	statement, err :=  _db.Prepare(models.GameSchema)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	statement.Exec()
 }
 
+//Game manages Game CRUD
+type Game struct {
 
-func CreateGame(game Game) {
+}
+
+//Inserts a new Game into database
+func (g *Game) Insert(game models.Game) error {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println("Create Game",game)
 	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,fen,updated) 
 			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:fen,datetime('now'))`
-	_, err := db.NamedExec(query, game)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	_, err := _db.NamedExec(query, game)
+	return err
 }
 
-func UpdateGame(game Game) {
+//Update updates an existing Game
+func (g *Game) Update(game models.Game) error {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println("Update game",game)
-	_,err := db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
+	_,err := _db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
 				colorTurn=:colorTurn, engine=:engine, engineDepth=:engineDepth, engineNodes=:engineNodes,
 				outcome=:outcome, fen=:fen, updated=datetime('now') WHERE gameName =:gameName`, game)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	return err
 } 
 
-func GetGame(name string) (Game,bool) {
-	var game Game
-	err := db.Get(&game,"SELECT * FROM games WHERE gameName = ? LIMIT 1",name)
+//GetByName find a Game by name - bool true if game exists
+func (g *Game) GetByName(name string) (models.Game,bool) {
+	var game models.Game
+	err := _db.Get(&game,"SELECT * FROM games WHERE gameName = ? LIMIT 1",name)
 	if err != nil || err == sql.ErrNoRows {
 		return game,false
 	}
 	return game,true
 }
 
-func GetGames() ([]Game,error) {
+//GetAll gets the list of Game
+func (g *Game) GetAll() ([]models.Game,error) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	games := []Game{}
-	err := db.Select(&games, "SELECT * FROM games")
+	games := []models.Game{}
+	err := _db.Select(&games, "SELECT * FROM games")
 	if err != nil {
 		return nil, err
 	}

@@ -14,8 +14,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "chess-cli",
 	Short: "Play chess against computer inside your terminal",
-	Long: `Chess-cli is a CLI to play chess against a computer with various levels of difficulty
-	
+	Long: `Chess-cli is a CLI to play chess against an engine of your choice with the ability to specify depth and nodes
 	`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:

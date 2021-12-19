@@ -26,8 +26,10 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
+var gameDAO data.Game
+
 func displayGames() {
-	games,err := data.GetGames()
+	games,err := gameDAO.GetAll()
 	if err != nil {
 		fmt.Println("No games found")
 	}

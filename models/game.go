@@ -1,4 +1,4 @@
-package data
+package models
 
 type Game struct {
 	Id          int    `db:"id"`

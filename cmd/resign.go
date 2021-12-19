@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/nemo984/chess-cli/data"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,7 @@ var resignCmd = &cobra.Command{
 		if len(args) < 1 {
 			return errors.New("requires a game name argument")
 		}
-		_,ok := data.GetGame(args[0])
+		_,ok := gameDAO.GetByName(args[0])
 		if !ok {
 			return errors.New("game with this name doesn't exist")
 		}

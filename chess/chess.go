@@ -6,11 +6,15 @@ import (
 	"os"
 
 	"github.com/nemo984/chess-cli/data"
+	"github.com/nemo984/chess-cli/models"
 	"github.com/notnil/chess"
 )
 
+
+
 var Game *chess.Game
-var gameName string
+var gameDAO data.Game
+var _gameName string
 
 type playee interface{
 	getMoveAndMove() (exit bool)
@@ -18,7 +22,7 @@ type playee interface{
 
 func NewGame(engine Engine) {
 	Game = chess.NewGame()
-	gameName = "newName" //get game name from a flag
+	_gameName = "newName" //get game name from a flag
 	engine.setUp()
 	engine.setColor(chess.Black)
 	//TODO: func to choose color
@@ -31,7 +35,7 @@ func NewGame(engine Engine) {
 }
 
 func ContinueGame(name string) {
-	game,ok := data.GetGame(name)
+	game,ok := gameDAO.GetByName(name)
 	if !ok {
 		fmt.Println("Game doesn't exist")
 		os.Exit(0)
@@ -42,7 +46,7 @@ func ContinueGame(name string) {
 		log.Fatal(err.Error())
 	}
 	Game = chess.NewGame(fen)
-	gameName = game.GameName
+	_gameName = game.GameName
 
 	player := Player{
 		Color: strColor(game.Color),
@@ -78,9 +82,9 @@ func startGame(playees []playee,player Player,engine Engine) {
 
 			if exit || Game.Outcome() != chess.NoOutcome  {
 				fmt.Println("Game Status: ",Game.Outcome(),Game.Method())
-				_,exists := data.GetGame(gameName)
+				_,exists := gameDAO.GetByName(_gameName)
 				saveGame(player,engine,exists)
-				fmt.Println("Game",gameName,"Saved")
+				fmt.Println("Game",_gameName,"Saved")
 				os.Exit(0)
 			}
 		}
@@ -90,9 +94,9 @@ func startGame(playees []playee,player Player,engine Engine) {
 
 
 func saveGame(player Player, engine Engine,update bool) {
-	game := data.Game{
+	game := models.Game{
 		Color: colorStr(player.Color),
-		GameName: gameName,
+		GameName: _gameName,
 		EngineColor: colorStr(engine.Color),
 		ColorTurn: colorStr(Game.Position().Turn()),
 		Engine: engine.Path,
@@ -102,9 +106,9 @@ func saveGame(player Player, engine Engine,update bool) {
 		FEN: Game.FEN(),
 	}
 	if update {
-		data.UpdateGame(game)
+		gameDAO.Update(game)
 	} else {
-		data.CreateGame(game)
+		gameDAO.Insert(game)
 	}
 }
 
