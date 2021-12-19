@@ -1,8 +1,11 @@
 package chess
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/nemo984/chess-cli/data"
@@ -48,6 +51,16 @@ func ContinueGame(name string) {
 	Game = chess.NewGame(fen)
 	_gameName = game.GameName
 
+	if Game.Outcome() != chess.NoOutcome {
+		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n",_gameName, Game.Outcome(), Game.Method()) 
+		lichessURL,err := lichessAnalysisURL(game.PGN)
+		if err != nil { //can't get lichess url
+			os.Exit(0) 
+		}
+		fmt.Printf("Analyze on lichess: %v\n", lichessURL)
+		os.Exit(0)
+	}
+
 	player := Player{
 		Color: strColor(game.Color),
 	}
@@ -71,12 +84,10 @@ func ContinueGame(name string) {
 
 }
 
-
 func startGame(playees []playee,player Player,engine Engine) {
-	log.Println(playees)
+	fmt.Println(Game.Position().Board().Draw())
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
-			fmt.Println(Game.Position().Board().Draw())
 			exit := playee.getMoveAndMove()
 			fmt.Println(Game.Position().Board().Draw())
 
@@ -92,7 +103,6 @@ func startGame(playees []playee,player Player,engine Engine) {
     }
 }
 
-
 func saveGame(player Player, engine Engine,update bool) {
 	game := models.Game{
 		Color: colorStr(player.Color),
@@ -104,6 +114,7 @@ func saveGame(player Player, engine Engine,update bool) {
 		EngineNodes: engine.Nodes,
 		Outcome: Game.Method().String(),
 		FEN: Game.FEN(),
+		PGN: Game.String(),
 	}
 	if update {
 		gameDAO.Update(game)
@@ -124,4 +135,25 @@ func strColor(color string) chess.Color {
 		return chess.White
 	}
 	return chess.Black
+}
+
+func lichessAnalysisURL(pgn string) (string, error) {
+	url := "https://lichess.org/api/import"
+	values := map[string]string{"pgn": pgn}
+	jsonValue, _ := json.Marshal(values)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
+	if err != nil {
+		return "",err
+	}
+	defer resp.Body.Close()
+	
+	j := struct {
+		ID string `json:"id"`
+		URL string `json:"url"`
+	}{}
+	err = json.NewDecoder(resp.Body).Decode(&j)
+	if err != nil {
+		return "",err
+	}
+	return j.URL, nil
 }
