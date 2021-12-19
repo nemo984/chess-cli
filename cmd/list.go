@@ -9,7 +9,6 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/nemo984/chess-cli/data"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +25,6 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
-var gameDAO data.Game
 
 func displayGames() {
 	games,err := gameDAO.GetAll()

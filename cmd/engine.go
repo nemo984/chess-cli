@@ -25,8 +25,10 @@ var engineCmd = &cobra.Command{
 	},
 }
 
-var engine chess.Engine
-var game string
+var (
+	engine chess.Engine
+	game string
+)
 
 func init() {
 

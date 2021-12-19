@@ -2,6 +2,7 @@ package data
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -74,4 +75,21 @@ func (g *Game) GetAll() ([]models.Game,error) {
 		return nil, err
 	}
 	return games,nil
+}
+
+//Delete deletes a Game by Name
+func (g *Game) DeleteByName(name string) error {
+	res, err := _db.Exec("DELETE FROM games WHERE gameName=$1", name)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()  
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("Game \"%v\" doesn't exist",name)
+	}
+	return nil
 }

@@ -15,9 +15,11 @@ import (
 	"github.com/notnil/chess"
 )
 
-var Game *chess.Game
-var gameDAO data.Game
-var _gameName string
+var (
+	Game *chess.Game
+	gameDAO data.Game
+	_gameName string
+)
 
 type playee interface{
 	getMoveAndMove() (exit bool)

@@ -25,8 +25,3 @@ func (p Player) getMoveAndMove() (exit bool) {
 		}
 	}
 }
-
-func (p Player) resign() {
-	Game.Resign(p.Color)
-}
-
