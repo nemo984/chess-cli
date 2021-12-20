@@ -16,6 +16,7 @@ import (
 var (
 	engine chess.Engine
 	name string
+	color string
 
 	engineCmd = &cobra.Command{
 		Use:   "engine",
@@ -39,6 +40,7 @@ func init() {
 	engineCmd.Flags().IntVarP(&engine.Nodes, "nodes", "n",862438, "Set the engine to search x nodes only")
 
 	engineCmd.Flags().StringVar(&name, "name", "", "Set the name of the game (default random)")
+	engineCmd.Flags().StringVar(&color,"color","","choose color (default random)")
 
 	viper.BindPFlag("path", engineCmd.Flags().Lookup("path"))
 	viper.BindPFlag("depth", engineCmd.Flags().Lookup("depth"))

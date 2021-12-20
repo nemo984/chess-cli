@@ -2,6 +2,7 @@ package chess
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/notnil/chess"
 )
@@ -10,18 +11,44 @@ type Player struct {
 	Color chess.Color
 }
 
-func (p Player) getMoveAndMove() (exit bool) {
+func (p Player) getMoveAndMove() (exit bool,save bool) {
 	var input string
 	for {
-		fmt.Printf("Enter Your Move (%v): ", p.Color)
+		fmt.Print("Your Move, Enter (?) for options: ")
 		fmt.Scanln(&input)
-		if err := Game.MoveStr(input); err != nil {
-			if input == "q" {
-				return true
+		switch input {
+		case "?":
+			fmt.Println(options())
+		case "r":
+			moves := Game.ValidMoves()
+			move := rand.Intn(len(moves))
+			Game.Move(moves[move])
+			fmt.Println("Random move!:", moves[move])
+			return false, true
+
+		case "q":
+			return true, true
+		
+		case "q!":
+			return true, false
+
+		default:
+			if err := Game.MoveStr(input); err != nil {
+				fmt.Println("Invalid Move, Try Again")
+			} else {
+				fmt.Println("You played: ",input)
 			}
-			fmt.Println("Invalid Move, Try Again")
-		} else {
-			return false
+			return false, true
 		}
+			
 	}
+}
+
+func options() string {
+	option := `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
+	To make a random move, Enter (r)
+	To quit and save the game, Enter (q)
+	To quit without saving, Enter (q!)
+	`
+	return option
 }

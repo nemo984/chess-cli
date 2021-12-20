@@ -22,7 +22,7 @@ var (
 )
 
 type playee interface{
-	getMoveAndMove() (exit bool)
+	getMoveAndMove() (exit bool, save bool)
 }
 
 func NewGame(engine Engine, name string) {
@@ -30,7 +30,6 @@ func NewGame(engine Engine, name string) {
 	_gameName = name
 	engine.setUp()
 	engine.setColor(chess.Black)
-	//TODO: func to choose color
 	player := Player{chess.White}
 	playees := []playee{
 		player,
@@ -42,7 +41,7 @@ func NewGame(engine Engine, name string) {
 func ContinueGame(name string) {
 	game,ok := gameDAO.GetByName(name)
 	if !ok {
-		fmt.Println("Game doesn't exist")
+		fmt.Printf("Game \"%v\" doesn't exist", name)
 		os.Exit(0)
 	}
 	if c := GameContinuable(game); !c {
@@ -82,20 +81,26 @@ func ContinueGame(name string) {
 
 func startGame(playees []playee,player Player,engine Engine) {
 	fmt.Println(Game.Position().Board().Draw())
+	
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
-			exit := playee.getMoveAndMove()
-			fmt.Println(Game.Position().Board().Draw())
+			exit,save := playee.getMoveAndMove()
+
+			if !exit {
+				fmt.Println(Game.Position().Board().Draw())
+			}
 
 			if exit || Game.Outcome() != chess.NoOutcome  {
 				fmt.Println("Game Status: ",Game.Outcome(),Game.Method())
-				_,exists := gameDAO.GetByName(_gameName)
-				err := saveGame(player,engine,exists)
-				if err != nil {
-					fmt.Println("Error at saving game:",err.Error())
-					os.Exit(1)
+				if save {
+					_,exists := gameDAO.GetByName(_gameName)
+					err := saveGame(player,engine,exists)
+					if err != nil {
+						fmt.Println("Error at saving game:",err.Error())
+						os.Exit(1)
+					}
+					fmt.Printf("Game %v Saved", _gameName)
 				}
-				fmt.Printf("Game %v Saved", _gameName)
 				os.Exit(0)
 			}
 		}
