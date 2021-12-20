@@ -31,6 +31,10 @@ func (p Player) getMoveAndMove() (exit bool,save bool) {
 		
 		case "q!":
 			return true, false
+		
+		case "resign":
+			Game.Resign(p.Color)
+			return true,true
 
 		default:
 			if err := Game.MoveStr(input); err != nil {
@@ -46,6 +50,7 @@ func (p Player) getMoveAndMove() (exit bool,save bool) {
 
 func options() string {
 	option := `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
+	To resign, Enter (resign)
 	To make a random move, Enter (r)
 	To quit and save the game, Enter (q)
 	To quit without saving, Enter (q!)

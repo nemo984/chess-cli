@@ -27,6 +27,7 @@ var (
 func init() {
 	rootCmd.AddCommand(playCmd)
 	playCmd.Flags().StringVar(&game, "game","", "continue an existing game with x name")
+	playCmd.MarkFlagRequired("game")
 	viper.BindPFlag("game", engineCmd.Flags().Lookup("game"))
 
 }
