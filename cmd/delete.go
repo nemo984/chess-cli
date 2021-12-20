@@ -18,21 +18,24 @@ var deleteCmd = &cobra.Command{
 	Short: "chess-cli delete [game-name]",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return errors.New("requires a game name argument")
-		}
-		_,ok := gameDAO.GetByName(args[0])
-		if !ok {
-			return fmt.Errorf("game \"%v\" doesn't exist",args[0])
+			return errors.New("requires at least one game name argument")
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		err := gameDAO.DeleteByName(args[0])
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(0)
+		for _, name := range args {
+			_,ok := gameDAO.GetByName(name)
+			if !ok {
+				fmt.Printf("Game \"%v\" doesn't exist.\n",name)
+				continue
+			}
+			err := gameDAO.DeleteByName(name)
+			if err != nil {
+				fmt.Println(err.Error())
+				os.Exit(0)
+			}
+			fmt.Printf("Game \"%v\" is deleted.\n",name)
 		}
-		fmt.Printf("Game \"%v\" is deleted",args[0])
 	},
 }
 
