@@ -25,9 +25,9 @@ type playee interface{
 	getMoveAndMove() (exit bool)
 }
 
-func NewGame(engine Engine) {
+func NewGame(engine Engine, name string) {
 	Game = chess.NewGame()
-	_gameName = "newName" //get game name from a flag
+	_gameName = name
 	engine.setUp()
 	engine.setColor(chess.Black)
 	//TODO: func to choose color
@@ -90,8 +90,12 @@ func startGame(playees []playee,player Player,engine Engine) {
 			if exit || Game.Outcome() != chess.NoOutcome  {
 				fmt.Println("Game Status: ",Game.Outcome(),Game.Method())
 				_,exists := gameDAO.GetByName(_gameName)
-				saveGame(player,engine,exists)
-				fmt.Println("Game",_gameName,"Saved")
+				err := saveGame(player,engine,exists)
+				if err != nil {
+					fmt.Println("Error at saving game:",err.Error())
+					os.Exit(1)
+				}
+				fmt.Printf("Game %v Saved", _gameName)
 				os.Exit(0)
 			}
 		}
@@ -99,7 +103,7 @@ func startGame(playees []playee,player Player,engine Engine) {
     }
 }
 
-func saveGame(player Player, engine Engine,update bool) {
+func saveGame(player Player, engine Engine,update bool) error {
 	game := models.Game{
 		Color: utils.ColorStr(player.Color),
 		GameName: _gameName,
@@ -113,22 +117,24 @@ func saveGame(player Player, engine Engine,update bool) {
 		FEN: Game.FEN(),
 		PGN: Game.String(),
 	}
+	var err error
 	if update {
-		gameDAO.Update(game)
+		err = gameDAO.Update(game)
 	} else {
-		gameDAO.Insert(game)
+		err = gameDAO.Insert(game)
 	}
+	return err
 }
 
 func GameContinuable(game models.Game) bool {
 	if game.Outcome != chess.NoOutcome.String() {
 		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n",game.GameName,game.Outcome,game.Method) 
-		lichessURL,err := lichessAnalysisURL(game.PGN)
+		URL,err := lichessAnalysisURL(game.PGN)
 		fmt.Print("Analyze on lichess: ")
 		if err != nil { 
 			fmt.Println("Can't get link,",err.Error())
 		} else {
-			fmt.Println(lichessURL)
+			fmt.Println(URL)
 		}
 		return false
 	}
