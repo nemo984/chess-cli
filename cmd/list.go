@@ -19,21 +19,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all your games",
-	Run: func(cmd *cobra.Command, args []string) {
-		displayGames()
-	},
-}
+var (
+	all bool
+
+	listCmd = &cobra.Command{
+		Use:   "list",
+		Short: "List all your games (default will only show on-going games)",
+		Run: func(cmd *cobra.Command, args []string) {
+			displayGames(all)
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+	listCmd.Flags().BoolVar(&all, "all",false, "list all games")
+
 }
 
 
-func displayGames() {
+func displayGames(listAll bool) {
 	games,err := gameDAO.GetAll()
 	if err != nil {
 		fmt.Println("No games found")
@@ -47,6 +52,10 @@ func displayGames() {
 		method := game.Method
 		if c := strings.Compare(method,"NoMethod"); c == 0 {
 			method = "Undecided"
+		} else {
+			if !listAll {
+				continue
+			}
 		}
 
 		fen,err := chess.FEN(game.FEN)
