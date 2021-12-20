@@ -5,6 +5,7 @@ Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -26,9 +27,17 @@ var (
 		Short: "Play against an engine",
 		Run: func(cmd *cobra.Command, args []string) {
 			data.CreateTable()
+
 			if name == "" {
 				name = utils.RandStringRunes(5)
+			} else {
+				_,ok := gameDAO.GetByName(name)
+				if ok {
+					fmt.Printf("Game \"%v\" already exists\n",name)
+					return
+				}
 			}
+
 			if color == "" {
 				rand.Seed(time.Now().UnixNano())
 				color = []string{"white","black"}[rand.Intn(2)]

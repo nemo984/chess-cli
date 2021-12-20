@@ -1,15 +1,12 @@
 package chess
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"sort"
 	"strings"
 
+	"github.com/nemo984/chess-cli/chess/lichess"
 	"github.com/nemo984/chess-cli/data"
 	"github.com/nemo984/chess-cli/models"
 	"github.com/nemo984/chess-cli/utils"
@@ -141,7 +138,7 @@ func saveGame(player Player, engine Engine,update bool) error {
 func GameContinuable(game models.Game) bool {
 	if game.Outcome != chess.NoOutcome.String() {
 		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n",game.GameName,game.Outcome,game.Method) 
-		URL,err := lichessAnalysisURL(game.PGN)
+		URL,err := lichess.AnalysisURL(game.PGN)
 		fmt.Print("Analyze on lichess: ")
 		if err != nil { 
 			fmt.Println("Can't get link,",err.Error())
@@ -153,29 +150,28 @@ func GameContinuable(game models.Game) bool {
 	return true
 }
 
-func lichessAnalysisURL(pgn string) (string, error) {
-	url := "https://lichess.org/api/import"
-	values := map[string]string{"pgn": strings.TrimSpace(pgn)}
-	jsonValue, _ := json.Marshal(values)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
+func StartPuzzle() error {
+	puzzle,err := lichess.GetPuzzle()
 	if err != nil {
-		return "",err
+		return err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Non-OK HTTP status: %v",resp.StatusCode)
-	}
-
-	j := struct {
-		ID string `json:"id"`
-		URL string `json:"url"`
-	}{}
-	err = json.NewDecoder(resp.Body).Decode(&j)
+	new,err := chess.PGN(strings.NewReader(puzzle.Game.PGN))
 	if err != nil {
-		return "",err
+		return err
 	}
-	return j.URL, nil
+	Game = chess.NewGame(new)
+	player := Player{Game.Position().Turn()}
+
+	board := Board{Game.Position().Board()}
+	fmt.Println(board.DrawP(player.Color))
+	for Game.Outcome() == chess.NoOutcome {
+		player.getMoveAndMove()
+		board = Board{Game.Position().Board()}
+		fmt.Println(board.DrawP(player.Color))
+	}
+	
+
+	return nil
 }
 
 
@@ -183,13 +179,13 @@ type Board struct {
 	*chess.Board
 }
 
-//Draw based on color perspective
+//Draw Board based on color perspective
 func (b *Board) DrawP(color chess.Color) string {
 	s := "\n A B C D E F G H\n"
 	rows := []int{7,6,5,4,3,2,1,0}
 	if color == chess.Black {
 		b.Flip(chess.UpDown)
-		sort.Ints(rows)
+		rows = []int{0,1,2,3,4,5,6,7}
 	}
 	for _,r := range rows {
 		s += chess.Rank(r).String()
