@@ -41,8 +41,8 @@ func (p Player) getMoveAndMove() (exit bool,save bool) {
 				fmt.Println("Invalid Move, Try Again")
 			} else {
 				fmt.Println("You played: ",input)
+				return false, true
 			}
-			return false, true
 		}
 			
 	}

@@ -6,8 +6,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
-	"text/tabwriter"
+
+	"github.com/jedib0t/go-pretty/v6/table"
+	c "github.com/nemo984/chess-cli/chess"
+	"github.com/nemo984/chess-cli/utils"
+	"github.com/notnil/chess"
 
 	"github.com/spf13/cobra"
 )
@@ -31,10 +36,20 @@ func displayGames() {
 	if err != nil {
 		fmt.Println("No games found")
 	}
-	w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
-	fmt.Fprintln(w, "Created\tUpdated\tName\tColor\tTurn\tStatus\tEngine\tDepth\tNodes")
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+    t.SetStyle(table.StyleLight)
+	t.AppendHeader(table.Row{"Name", "Color", "Turn", "Engine","Status","Board"})
+
 	for _,game := range games {
-		fmt.Fprintf(w, "%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\t%v\n",game.GetMoveCount(),game.Updated,game.GameName,game.Color,game.ColorTurn,game.Outcome,game.Engine,game.EngineDepth,game.EngineNodes)
+		fen,err := chess.FEN(game.FEN)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		g := chess.NewGame(fen)
+		board := g.Position().Board()
+		t.AppendRow(table.Row{game.GameName, game.Color, game.ColorTurn, game.Engine, game.Outcome, c.DrawP(board, utils.StrColor(game.Color))})	
+		t.AppendSeparator()
 	}
-	w.Flush()
+	t.Render()
 }

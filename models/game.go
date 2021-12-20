@@ -2,8 +2,6 @@ package models
 
 import (
 	"log"
-	"strings"
-	"unicode"
 
 	"github.com/nemo984/chess-cli/utils"
 	"github.com/notnil/chess"
@@ -38,14 +36,4 @@ func (g *Game) Resign() {
 	g.Method = game.Method().String()
 	g.FEN = game.FEN()
 	g.PGN = game.String()
-}
-
-func (g *Game) GetMoveCount() int {
-	pgn := strings.TrimSpace(g.PGN)
-	for i := len(pgn)-1; i >= 0; i-- {
-		if unicode.IsDigit(rune(pgn[i])) {
-			return int(pgn[i])
-		}
-	}
-	return 0
 }

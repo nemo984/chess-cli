@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/notnil/chess"
@@ -15,7 +16,7 @@ func ColorStr(color chess.Color) string {
 }
 
 func StrColor(color string) chess.Color {
-	if color == "White" {
+	if strings.ToLower(color) == "white" {
 		return chess.White
 	}
 	return chess.Black

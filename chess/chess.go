@@ -25,16 +25,16 @@ type playee interface{
 	getMoveAndMove() (exit bool, save bool)
 }
 
-func NewGame(engine Engine, name string) {
+func NewGame(engine Engine, name string, color string) {
 	Game = chess.NewGame()
 	_gameName = name
+	c := utils.StrColor(color)
+	player := Player{c}
+
 	engine.setUp()
-	engine.setColor(chess.Black)
-	player := Player{chess.White}
-	playees := []playee{
-		player,
-		engine,
-	}
+	engine.setColor(c.Other())
+
+	playees := setUpTurn(c,&player,&engine)
 	startGame(playees,player,engine)
 }
 
@@ -67,27 +67,31 @@ func ContinueGame(name string) {
 	}
 	engine.setUp()
 
+	startGame(setUpTurn(utils.StrColor(game.Color), &player, &engine), player, engine)
+
+}
+
+
+func setUpTurn(color chess.Color, player *Player, engine *Engine) []playee {
 	playees := []playee{
 		player,
 		engine,
 	}
-	//black to move - engine goes first
-	if utils.StrColor(game.ColorTurn) == chess.Black {
+	if color == chess.Black {
 		playees[0], playees[1] = playees[1], playees[0]
 	}
-	startGame(playees,player,engine)
-
+	return playees
 }
 
 func startGame(playees []playee,player Player,engine Engine) {
-	fmt.Println(Game.Position().Board().Draw())
+	fmt.Println(DrawP(Game.Position().Board(), player.Color))
 	
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
 			exit,save := playee.getMoveAndMove()
 
 			if !exit {
-				fmt.Println(Game.Position().Board().Draw())
+				fmt.Println(DrawP(Game.Position().Board(), player.Color))
 			}
 
 			if exit || Game.Outcome() != chess.NoOutcome  {
@@ -169,4 +173,12 @@ func lichessAnalysisURL(pgn string) (string, error) {
 		return "",err
 	}
 	return j.URL, nil
+}
+
+//Draw based on color perspective
+func DrawP(b *chess.Board, color chess.Color) string {
+	if color == chess.Black {
+		return b.Rotate().Transpose().Draw()
+	}
+	return b.Draw()
 }

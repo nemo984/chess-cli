@@ -5,6 +5,8 @@ Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"math/rand"
+
 	"github.com/nemo984/chess-cli/chess"
 	"github.com/nemo984/chess-cli/data"
 	"github.com/nemo984/chess-cli/utils"
@@ -23,10 +25,13 @@ var (
 		Short: "Play against an engine",
 		Run: func(cmd *cobra.Command, args []string) {
 			data.CreateTable()
-			if game == "" {
-				game = utils.RandStringRunes(5)
+			if name == "" {
+				name = utils.RandStringRunes(5)
 			}
-			chess.NewGame(engine,game)
+			if color == "" {
+				color = []string{"white","black"}[rand.Intn(2)]
+			}
+			chess.NewGame(engine,name,color)
 		},
 	}
 )
