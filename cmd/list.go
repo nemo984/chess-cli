@@ -46,7 +46,7 @@ func displayGames() {
 	for _,game := range games {
 		method := game.Method
 		if c := strings.Compare(method,"NoMethod"); c == 0 {
-			method = "On-going"
+			method = "Undecided"
 		}
 
 		fen,err := chess.FEN(game.FEN)

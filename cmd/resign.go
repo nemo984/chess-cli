@@ -21,23 +21,27 @@ var resignCmd = &cobra.Command{
 		if len(args) < 1 {
 			return errors.New("requires a game name argument")
 		}
-		game,ok := gameDAO.GetByName(args[0])
-		if !ok {
-			return fmt.Errorf("game \"%v\" doesn't exist",args[0])
-		}
-		if continuable := chess.GameContinuable(game); !continuable {
-			return fmt.Errorf("game \"%v\" is already over",args[0])
-		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		game,_ := gameDAO.GetByName(args[0])
-		game.Resign()
-		err := gameDAO.Update(game)
-		if err != nil {
-			log.Fatal(err.Error())
+		for _,name := range args {
+			game,ok := gameDAO.GetByName(name)
+			if !ok {
+				fmt.Printf("Game \"%v\" doesn't exist.\n",name)
+				continue
+			}
+			if continuable := chess.GameContinuable(game); !continuable {
+				fmt.Printf("Game \"%v\" is already over.\n",name)
+				continue
+			}
+
+			game.Resign()
+			err := gameDAO.Update(game)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			fmt.Printf("You resigned on Game \"%v\" Status: %v, %v\n", game.GameName, game.Outcome, game.Method)
 		}
-		fmt.Printf("You resigned on Game \"%v\" Status: %v, %v", game.GameName, game.Outcome, game.Method)
 	},
 }
 
