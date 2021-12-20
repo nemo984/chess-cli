@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/nemo984/chess-cli/data"
@@ -84,14 +85,16 @@ func setUpTurn(color chess.Color, player *Player, engine *Engine) []playee {
 }
 
 func startGame(playees []playee,player Player,engine Engine) {
-	fmt.Println(DrawP(Game.Position().Board(), player.Color))
+	board := Board{Game.Position().Board()}
+	fmt.Println(board.DrawP(player.Color))
 	
     for Game.Outcome() == chess.NoOutcome {
 		for _,playee := range playees {
 			exit,save := playee.getMoveAndMove()
 
 			if !exit {
-				fmt.Println(DrawP(Game.Position().Board(), player.Color))
+				board := Board{Game.Position().Board()}
+				fmt.Println(board.DrawP(player.Color))
 			}
 
 			if exit || Game.Outcome() != chess.NoOutcome  {
@@ -175,10 +178,35 @@ func lichessAnalysisURL(pgn string) (string, error) {
 	return j.URL, nil
 }
 
+
+type Board struct {
+	*chess.Board
+}
+
 //Draw based on color perspective
-func DrawP(b *chess.Board, color chess.Color) string {
+func (b *Board) DrawP(color chess.Color) string {
+	s := "\n A B C D E F G H\n"
+	rows := []int{7,6,5,4,3,2,1,0}
 	if color == chess.Black {
-		return b.Rotate().Transpose().Draw()
+		b.Flip(chess.UpDown)
+		sort.Ints(rows)
 	}
-	return b.Draw()
+	for _,r := range rows {
+		s += chess.Rank(r).String()
+		for f := 0; f < 8; f++ {
+			p := b.Piece(getSquare(chess.File(f), chess.Rank(r)))
+			if p == chess.NoPiece {
+				s += "-"
+			} else {
+				s += p.String()
+			}
+			s += " "
+		}
+		s += "\n"
+	}
+	return s
+}
+
+func getSquare(f chess.File, r chess.Rank) chess.Square {
+	return chess.Square((int(r) * 8) + int(f))
 }

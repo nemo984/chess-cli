@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/nemo984/chess-cli/chess"
 	"github.com/nemo984/chess-cli/data"
@@ -29,6 +30,7 @@ var (
 				name = utils.RandStringRunes(5)
 			}
 			if color == "" {
+				rand.Seed(time.Now().UnixNano())
 				color = []string{"white","black"}[rand.Intn(2)]
 			}
 			chess.NewGame(engine,name,color)

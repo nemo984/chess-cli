@@ -33,7 +33,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().BoolVar(&all, "all",false, "list all games")
+	listCmd.Flags().BoolVarP(&all, "all", "a", false, "list all games")
 
 }
 
@@ -63,9 +63,8 @@ func displayGames(listAll bool) {
 			log.Fatal(err.Error())
 		}
 		g := chess.NewGame(fen)
-		board := g.Position().Board()
-
-		t.AppendRow(table.Row{game.GameName, game.Color, game.ColorTurn, filepath.Base(game.Engine), game.Outcome, method, c.DrawP(board, utils.StrColor(game.Color))})	
+		board := c.Board{g.Position().Board()}
+		t.AppendRow(table.Row{game.GameName, game.Color, game.ColorTurn, filepath.Base(game.Engine), game.Outcome, method, board.DrawP(utils.StrColor(game.Color))})	
 		t.AppendSeparator()
 	}
 	t.Render()
