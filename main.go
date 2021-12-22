@@ -10,6 +10,6 @@ import (
 )
 
 func main() {
-	data.OpenDatabase();
+	data.OpenDatabase()
 	cmd.Execute()
 }

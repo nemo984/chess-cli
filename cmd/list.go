@@ -37,20 +37,19 @@ func init() {
 
 }
 
-
 func displayGames(listAll bool) {
-	games,err := gameDAO.GetAll()
+	games, err := gameDAO.GetAll()
 	if err != nil {
 		fmt.Println("No games found")
 	}
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-    t.SetStyle(table.StyleLight)
-	t.AppendHeader(table.Row{"Last Played","Name", "Color", "Turn", "Engine","Result","Method","Board"})
+	t.SetStyle(table.StyleLight)
+	t.AppendHeader(table.Row{"Last Played", "Name", "Color", "Turn", "Engine", "Result", "Method", "Board"})
 
-	for _,game := range games {
+	for _, game := range games {
 		method := game.Method
-		if c := strings.Compare(method,"NoMethod"); c == 0 {
+		if c := strings.Compare(method, "NoMethod"); c == 0 {
 			method = "Undecided"
 		} else {
 			if !listAll {
@@ -58,7 +57,7 @@ func displayGames(listAll bool) {
 			}
 		}
 
-		fen,err := chess.FEN(game.FEN)
+		fen, err := chess.FEN(game.FEN)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -66,7 +65,7 @@ func displayGames(listAll bool) {
 		board := c.Board{g.Position().Board()}
 		lastPlayed := utils.GetLastPlayed(game.Updated)
 
-		t.AppendRow(table.Row{lastPlayed, game.GameName, game.Color, game.ColorTurn, filepath.Base(game.Engine), game.Outcome, method, board.DrawP(utils.StrColor(game.Color))})	
+		t.AppendRow(table.Row{lastPlayed, game.GameName, game.Color, game.ColorTurn, filepath.Base(game.Engine), game.Outcome, method, board.DrawP(utils.StrColor(game.Color))})
 		t.AppendSeparator()
 	}
 	t.Render()

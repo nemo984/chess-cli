@@ -24,14 +24,14 @@ var resignCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		for _,name := range args {
-			game,ok := gameDAO.GetByName(name)
+		for _, name := range args {
+			game, ok := gameDAO.GetByName(name)
 			if !ok {
-				fmt.Printf("Game \"%v\" doesn't exist.\n",name)
+				fmt.Printf("Game \"%v\" doesn't exist.\n", name)
 				continue
 			}
 			if continuable := chess.GameContinuable(game); !continuable {
-				fmt.Printf("Game \"%v\" is already over.\n",name)
+				fmt.Printf("Game \"%v\" is already over.\n", name)
 				continue
 			}
 

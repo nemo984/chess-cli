@@ -16,11 +16,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-
 var (
 	engine chess.Engine
-	name string
-	color string
+	name   string
+	color  string
 
 	engineCmd = &cobra.Command{
 		Use:   "engine",
@@ -31,18 +30,18 @@ var (
 			if name == "" {
 				name = utils.RandStringRunes(5)
 			} else {
-				_,ok := gameDAO.GetByName(name)
+				_, ok := gameDAO.GetByName(name)
 				if ok {
-					fmt.Printf("Game \"%v\" already exists\n",name)
+					fmt.Printf("Game \"%v\" already exists\n", name)
 					return
 				}
 			}
 
 			if color == "" {
 				rand.Seed(time.Now().UnixNano())
-				color = []string{"white","black"}[rand.Intn(2)]
+				color = []string{"white", "black"}[rand.Intn(2)]
 			}
-			chess.NewGame(engine,name,color)
+			chess.NewGame(engine, name, color)
 		},
 	}
 )
@@ -50,13 +49,13 @@ var (
 func init() {
 	playCmd.AddCommand(engineCmd)
 
-	engineCmd.Flags().StringVarP(&engine.Path, "path", "p","", "Set the path where engine is stored")
+	engineCmd.Flags().StringVarP(&engine.Path, "path", "p", "", "Set the path where engine is stored")
 	engineCmd.MarkFlagRequired("path")
-	engineCmd.Flags().IntVarP(&engine.Depth,"depth","d",21,"Set the engine depth/to search x piles only")
-	engineCmd.Flags().IntVarP(&engine.Nodes, "nodes", "n",862438, "Set the engine to search x nodes only")
+	engineCmd.Flags().IntVarP(&engine.Depth, "depth", "d", 21, "Set the engine depth/to search x piles only")
+	engineCmd.Flags().IntVarP(&engine.Nodes, "nodes", "n", 862438, "Set the engine to search x nodes only")
 
 	engineCmd.Flags().StringVar(&name, "name", "", "Set the name of the game (default random)")
-	engineCmd.Flags().StringVar(&color,"color","","choose color (default random)")
+	engineCmd.Flags().StringVar(&color, "color", "", "choose color (default random)")
 
 	viper.BindPFlag("path", engineCmd.Flags().Lookup("path"))
 	viper.BindPFlag("depth", engineCmd.Flags().Lookup("depth"))

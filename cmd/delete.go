@@ -23,9 +23,9 @@ var deleteCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, name := range args {
-			_,ok := gameDAO.GetByName(name)
+			_, ok := gameDAO.GetByName(name)
 			if !ok {
-				fmt.Printf("Game \"%v\" doesn't exist.\n",name)
+				fmt.Printf("Game \"%v\" doesn't exist.\n", name)
 				continue
 			}
 			err := gameDAO.DeleteByName(name)
@@ -33,11 +33,10 @@ var deleteCmd = &cobra.Command{
 				fmt.Println(err.Error())
 				os.Exit(0)
 			}
-			fmt.Printf("Game \"%v\" is deleted.\n",name)
+			fmt.Printf("Game \"%v\" is deleted.\n", name)
 		}
 	},
 }
-
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)

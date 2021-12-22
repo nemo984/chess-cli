@@ -32,7 +32,7 @@ func (e *Engine) setColor(color chess.Color) {
 	e.Color = color
 }
 
-func (e Engine) getMoveAndMove() (exit bool, save bool) {
+func (e Engine) getMoveAndMove(options string) (exit bool, save bool) {
 	cmdPos := uci.CmdPosition{Position: Game.Position()}
 	cmdGo := uci.CmdGo{Depth: e.Depth, Nodes: e.Nodes}
 

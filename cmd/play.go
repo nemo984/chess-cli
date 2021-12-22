@@ -19,14 +19,12 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			chess.ContinueGame(game)
 		},
-	
 	}
 )
 
-
 func init() {
 	rootCmd.AddCommand(playCmd)
-	playCmd.Flags().StringVar(&game, "game","", "continue an existing game with x name")
+	playCmd.Flags().StringVar(&game, "game", "", "continue an existing game with x name")
 	playCmd.MarkFlagRequired("game")
 	viper.BindPFlag("game", engineCmd.Flags().Lookup("game"))
 

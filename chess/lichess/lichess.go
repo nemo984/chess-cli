@@ -33,25 +33,25 @@ func AnalysisURL(pgn string) (string, error) {
 	return j.URL, nil
 }
 
-func GetPuzzle() (DailyPuzzle,error) {
+func GetPuzzle() (DailyPuzzle, error) {
 	j := DailyPuzzle{}
 	url := "https://lichess.org/api/puzzle/daily"
-	resp,err := http.Get(url)
+	resp, err := http.Get(url)
 	if err != nil {
-		return j,err
+		return j, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return j,fmt.Errorf("Non-OK HTTP status: %v",resp.StatusCode)
+		return j, fmt.Errorf("Non-OK HTTP status: %v", resp.StatusCode)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&j)
 	if err != nil {
-		return j,err
+		return j, err
 	}
 	fmt.Println(j)
 
-	return j,nil
+	return j, nil
 
 }

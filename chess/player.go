@@ -11,14 +11,14 @@ type Player struct {
 	Color chess.Color
 }
 
-func (p Player) getMoveAndMove() (exit bool,save bool) {
+func (p Player) getMoveAndMove(options string) (exit bool, save bool) {
 	var input string
 	for {
 		fmt.Print("Your Move, Enter (?) for options: ")
 		fmt.Scanln(&input)
 		switch input {
 		case "?":
-			fmt.Println(options())
+			fmt.Println(options)
 		case "r":
 			moves := Game.ValidMoves()
 			move := rand.Intn(len(moves))
@@ -28,32 +28,36 @@ func (p Player) getMoveAndMove() (exit bool,save bool) {
 
 		case "q":
 			return true, true
-		
+
 		case "q!":
 			return true, false
-		
+
 		case "resign":
 			Game.Resign(p.Color)
-			return true,true
+			return true, true
 
 		default:
 			if err := Game.MoveStr(input); err != nil {
 				fmt.Println("Invalid Move, Try Again")
 			} else {
-				fmt.Println("You played: ",input)
+				fmt.Println("You played: ", input)
 				return false, true
 			}
 		}
-			
+
 	}
 }
 
-func options() string {
-	option := `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
+var (
+	EngineGameOptions = `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
 	To resign, Enter (resign)
 	To make a random move, Enter (r)
 	To quit and save the game, Enter (q)
 	To quit without saving, Enter (q!)
 	`
-	return option
-}
+	PuzzleGameOptions = `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
+	To see hint, Enter (h)
+	To see solution, Enter (s)
+	To quit, Enter (q)
+	`
+)
