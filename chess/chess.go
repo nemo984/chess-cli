@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/nemo984/chess-cli/chess/lichess"
 	"github.com/nemo984/chess-cli/data"
@@ -32,7 +33,7 @@ func NewGame(engine Engine, name string, color string) {
 	engine.setUp()
 	engine.setColor(c.Other())
 
-	playees := setUpTurn(c,&player,&engine)
+	playees := setUpTurn(chess.White, player, engine)
 	startGame(playees,player,engine)
 }
 
@@ -65,17 +66,17 @@ func ContinueGame(name string) {
 	}
 	engine.setUp()
 
-	startGame(setUpTurn(utils.StrColor(game.Color), &player, &engine), player, engine)
+	startGame(setUpTurn(utils.StrColor(game.ColorTurn), player, engine), player, engine)
 
 }
 
 
-func setUpTurn(color chess.Color, player *Player, engine *Engine) []playee {
+func setUpTurn(colorTurn chess.Color, player Player, engine Engine) []playee {
 	playees := []playee{
 		player,
 		engine,
 	}
-	if color == chess.Black {
+	if engine.Color == colorTurn {
 		playees[0], playees[1] = playees[1], playees[0]
 	}
 	return playees
@@ -125,12 +126,13 @@ func saveGame(player Player, engine Engine,update bool) error {
 		Method: Game.Method().String(),
 		FEN: Game.FEN(),
 		PGN: Game.String(),
+		Updated: time.Now().Format(time.RFC3339),
 	}
 	var err error
 	if update {
 		err = gameDAO.Update(game)
 	} else {
-		err = gameDAO.Insert(game)
+		err = gameDAO.Insert(&game)
 	}
 	return err
 }
@@ -155,6 +157,7 @@ func StartPuzzle() error {
 	if err != nil {
 		return err
 	}
+	
 	new,err := chess.PGN(strings.NewReader(puzzle.Game.PGN))
 	if err != nil {
 		return err

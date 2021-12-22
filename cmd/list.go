@@ -46,7 +46,7 @@ func displayGames(listAll bool) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
     t.SetStyle(table.StyleLight)
-	t.AppendHeader(table.Row{"Name", "Color", "Turn", "Engine","Result","Method","Board"})
+	t.AppendHeader(table.Row{"Last Played","Name", "Color", "Turn", "Engine","Result","Method","Board"})
 
 	for _,game := range games {
 		method := game.Method
@@ -64,7 +64,9 @@ func displayGames(listAll bool) {
 		}
 		g := chess.NewGame(fen)
 		board := c.Board{g.Position().Board()}
-		t.AppendRow(table.Row{game.GameName, game.Color, game.ColorTurn, filepath.Base(game.Engine), game.Outcome, method, board.DrawP(utils.StrColor(game.Color))})	
+		lastPlayed := utils.GetLastPlayed(game.Updated)
+
+		t.AppendRow(table.Row{lastPlayed, game.GameName, game.Color, game.ColorTurn, filepath.Base(game.Engine), game.Outcome, method, board.DrawP(utils.StrColor(game.Color))})	
 		t.AppendSeparator()
 	}
 	t.Render()
