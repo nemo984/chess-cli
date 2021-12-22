@@ -17,7 +17,10 @@ var puzzleCmd = &cobra.Command{
 	Short: "Play a daily lichess puzzle",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("puzzle called")
-		chess.StartPuzzle()
+		err := chess.StartPuzzle()
+		if err != nil {
+			fmt.Println("Error:",err.Error())
+		}
 	},
 }
 

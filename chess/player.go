@@ -19,6 +19,10 @@ func (p Player) getMoveAndMove(options string) (exit bool, save bool) {
 		switch input {
 		case "?":
 			fmt.Println(options)
+		
+		case "v":
+			fmt.Println("Valid Moves:",Game.ValidMoves())
+
 		case "r":
 			moves := Game.ValidMoves()
 			move := rand.Intn(len(moves))
@@ -48,16 +52,25 @@ func (p Player) getMoveAndMove(options string) (exit bool, save bool) {
 	}
 }
 
+func (p Player) getMove() string {
+	var input string
+	fmt.Print("Your Move, Enter (?) for options: ")
+	fmt.Scanln(&input)
+	return input
+}
+
 var (
 	EngineGameOptions = `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
+	or Long Algebraic Notation, Examples: Rd1xd8+, Ng8f6.
+	To see valid moves, Enter (v)
 	To resign, Enter (resign)
 	To make a random move, Enter (r)
 	To quit and save the game, Enter (q)
 	To quit without saving, Enter (q!)
 	`
 	PuzzleGameOptions = `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
-	To see hint, Enter (h)
-	To see solution, Enter (s)
+	To see a hint, Enter (h)
+	To see the solution, Enter (s)
 	To quit, Enter (q)
 	`
 )

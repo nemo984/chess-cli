@@ -1,6 +1,7 @@
 package chess
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -161,17 +162,77 @@ func StartPuzzle() error {
 	if err != nil {
 		return err
 	}
+	solution := puzzle.Puzzle.Solution
+	rating := puzzle.Puzzle.Rating
 	Game = chess.NewGame(new)
 	player := Player{Game.Position().Turn()}
 	
 	board := Board{Game.Position().Board()}
+
+	g := chess.AlgebraicNotation{}
+	uci := chess.UCINotation{}
+
+	fmt.Println("Daily Puzzle started, Rating:",rating)
 	fmt.Println(board.DrawP(player.Color))
-	fmt.Println("c+? ", Game.Outcome())
-	for Game.Outcome() == chess.NoOutcome {
-		fmt.Printf("Hello?")
-		player.getMoveAndMove(PuzzleGameOptions)
+	var next bool 
+	for i := 0; i < len(solution); i++ {
+		for !next {
+			move := player.getMove()
+			switch move {
+			case "?":
+				fmt.Println(PuzzleGameOptions)
+			
+			case "h":
+				fmt.Printf("Hint: %v square\n", solution[i][:2])
+			
+			case "s":
+				fmt.Println("Solution/Remaining Moves:",solution[i:])
+
+			case "q":
+				os.Exit(0)
+			
+			default:
+				moveSol, err := uci.Decode(Game.Position(), solution[i])
+				if err != nil {
+					return errors.New("can't decode lichess move solution")
+				}
+				input, err := g.Decode(Game.Position(), move)
+				if err != nil {
+					fmt.Println("Not valid move")
+				} else {
+					if moveSol.S1() == input.S1() && moveSol.S2() == input.S2() {
+						Game.Move(input)
+						board = Board{Game.Position().Board()}
+						fmt.Println(board.DrawP(player.Color))
+						next = true
+					} else {
+						fmt.Println("Incorrect Move, Try Again")
+					}
+				}
+					
+			}
+		}
+
+		if i + 1 >= len(solution) {
+			fmt.Println("Daily puzzle solved.")
+			os.Exit(0)
+		}
+
+		fmt.Println("Correct Move, Continue:", solution[i+1])
+		moveSol, err := uci.Decode(Game.Position(), solution[i+1])
+		if err != nil {
+			fmt.Println("Solution/Remaining Moves:",solution[i+1:])
+			return fmt.Errorf("can't decode lichess move solution\n%v",err)
+		}
+		err = Game.Move(moveSol)
+		if err != nil {
+			fmt.Println("Solution/Remaining Moves:",solution[i+1:])
+			return fmt.Errorf("can't decode lichess move solution\n%v",err)
+		}
 		board = Board{Game.Position().Board()}
 		fmt.Println(board.DrawP(player.Color))
+		i++
+		next = false
 	}
 
 	return nil

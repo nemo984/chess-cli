@@ -50,8 +50,5 @@ func GetPuzzle() (DailyPuzzle, error) {
 	if err != nil {
 		return j, err
 	}
-	fmt.Println(j)
-
 	return j, nil
-
 }
