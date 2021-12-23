@@ -13,7 +13,7 @@ import (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   "delete [game-names...]",
 	Short: "chess-cli delete [game-names...]",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {

@@ -61,7 +61,6 @@ func (p Player) getMove() string {
 
 var (
 	EngineGameOptions = `To make a move, Enter an Algebratic Notation, Examples: e2, e5, O-O (short castling), e8=Q (promotion)
-	or Long Algebraic Notation, Examples: Rd1xd8+, Ng8f6.
 	To see valid moves, Enter (v)
 	To resign, Enter (resign)
 	To make a random move, Enter (r)

@@ -39,9 +39,7 @@ type Game struct {
 
 //Inserts a new Game into database
 func (g *Game) Insert(game *models.Game) error {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	game.Created = time.Now().Format(time.RFC3339)
-	log.Println("Create Game",game)
 	query := `INSERT INTO games(gameName, color, engineColor,colorTurn,engine,engineDepth,engineNodes,outcome,method,fen,pgn,created,updated) 
 			values(:gameName,:color,:engineColor,:colorTurn,:engine,:engineDepth,:engineNodes,:outcome,:method,:fen,:pgn,:created,:updated)`
 	_, err := _db.NamedExec(query, game)
@@ -50,8 +48,6 @@ func (g *Game) Insert(game *models.Game) error {
 
 //Update updates an existing Game
 func (g *Game) Update(game models.Game) error {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println("Update game",game)
 	_,err := _db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
 				colorTurn=:colorTurn, engine=:engine, engineDepth=:engineDepth, engineNodes=:engineNodes,
 				outcome=:outcome, method=:method, fen=:fen, pgn=:pgn, updated=:updated WHERE gameName =:gameName`, game)
@@ -70,7 +66,6 @@ func (g *Game) GetByName(name string) (models.Game,bool) {
 
 //GetAll gets the list of Game
 func (g *Game) GetAll() ([]models.Game,error) {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	games := []models.Game{}
 	err := _db.Select(&games, "SELECT * FROM games ORDER BY updated DESC")
 	if err != nil {

@@ -48,7 +48,6 @@ func ContinueGame(name string) {
 		os.Exit(0)
 	}
 
-	log.Println("Continue Game", game)
 	fen, err := chess.FEN(game.FEN)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -96,7 +95,14 @@ func startGame(playees []playee, player Player, engine Engine) {
 			}
 
 			if exit || Game.Outcome() != chess.NoOutcome {
-				fmt.Println("Game Status: ", Game.Outcome(), Game.Method())
+				var method string
+				if Game.Method() == chess.NoMethod {
+					method = "Undecided"
+				} else {
+					method = Game.Method().String()
+				}
+				fmt.Println("Game Status: ", Game.Outcome(), method)
+
 				if save {
 					_, exists := gameDAO.GetByName(_gameName)
 					err := saveGame(player, engine, exists)
@@ -104,7 +110,7 @@ func startGame(playees []playee, player Player, engine Engine) {
 						fmt.Println("Error at saving game:", err.Error())
 						os.Exit(1)
 					}
-					fmt.Printf("Game %v Saved", _gameName)
+					fmt.Printf("Game \"%v\" Saved", _gameName)
 				}
 				os.Exit(0)
 			}
@@ -183,7 +189,7 @@ func StartPuzzle() error {
 				fmt.Println(PuzzleGameOptions)
 			
 			case "h":
-				fmt.Printf("Hint: %v square\n", solution[i][:2])
+				fmt.Printf("Hint: %v piece\n", solution[i][:2])
 			
 			case "s":
 				fmt.Println("Solution/Remaining Moves:",solution[i:])
@@ -222,12 +228,12 @@ func StartPuzzle() error {
 		moveSol, err := uci.Decode(Game.Position(), solution[i+1])
 		if err != nil {
 			fmt.Println("Solution/Remaining Moves:",solution[i+1:])
-			return fmt.Errorf("can't decode lichess move solution\n%v",err)
+			return fmt.Errorf("can't decode lichess next move\n%v",err)
 		}
 		err = Game.Move(moveSol)
 		if err != nil {
 			fmt.Println("Solution/Remaining Moves:",solution[i+1:])
-			return fmt.Errorf("can't decode lichess move solution\n%v",err)
+			return fmt.Errorf("lichess next move is invalid \n%v",err)
 		}
 		board = Board{Game.Position().Board()}
 		fmt.Println(board.DrawP(player.Color))

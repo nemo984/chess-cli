@@ -7,15 +7,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"log"
 
-	"github.com/nemo984/chess-cli/chess"
+	"github.com/nemo984/chess-cli/chess/lichess"
 	"github.com/spf13/cobra"
 )
 
-var resignCmd = &cobra.Command{
-	Use:   "resign [game-names...]",
-	Short: "resign on your chess games",
+var analyzeCmd = &cobra.Command{
+	Use:   "analyze [game-names...]",
+	Short: "get lichess analyze urls",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one game name argument")
@@ -29,22 +28,17 @@ var resignCmd = &cobra.Command{
 				fmt.Printf("Game \"%v\" doesn't exist.\n", name)
 				continue
 			}
-			if continuable := chess.GameContinuable(game); !continuable {
-				fmt.Printf("Game \"%v\" is already over.\n", name)
-				continue
-			}
-
-			game.Resign()
-			err := gameDAO.Update(game)
+			url,err := lichess.AnalysisURL(game.PGN) 
+			fmt.Printf("Analyze Game \"%v\" on lichess: ", name)
 			if err != nil {
-				log.Fatal(err.Error())
+				fmt.Println("Can't get link,", err.Error())
+			} else {
+				fmt.Println(url)
 			}
-			fmt.Printf("You resigned on Game \"%v\" Status: %v, %v\n", game.GameName, game.Outcome, game.Method)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(resignCmd)
-
+	rootCmd.AddCommand(analyzeCmd)
 }
