@@ -88,7 +88,6 @@ func startGame(playees []playee, player Player, engine Engine) {
 	for Game.Outcome() == chess.NoOutcome {
 		for _, playee := range playees {
 			exit, save := playee.getMoveAndMove(EngineGameOptions)
-
 			if !exit {
 				board := Board{Game.Position().Board()}
 				fmt.Println(board.DrawP(player.Color))

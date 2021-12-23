@@ -54,6 +54,6 @@ func init() {
 	engineCmd.Flags().IntVarP(&engine.Nodes, "nodes", "n", 862438, "Set the engine to search x nodes only")
 
 	engineCmd.Flags().StringVar(&name, "name", "", "Set the name of the game (default random)")
-	engineCmd.Flags().StringVar(&color, "color", "", "choose color: white/black (default random)")
+	engineCmd.Flags().StringVar(&color, "color", "", "choose your color: white/black (default random)")
 
 }
