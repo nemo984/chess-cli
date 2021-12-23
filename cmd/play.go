@@ -11,8 +11,9 @@ var (
 	playCmd = &cobra.Command{
 		Use:   "play",
 		Short: "Play/Continue a chess game",
-		Run: func(cmd *cobra.Command, args []string) {
-			chess.ContinueGame(game)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := chess.ContinueGame(game)
+			return err
 		},
 	}
 )

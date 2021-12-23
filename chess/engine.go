@@ -15,16 +15,17 @@ type Engine struct {
 	Color chess.Color
 }
 
-func (e *Engine) setUp() {
+func (e *Engine) setUp() error {
 	eng, err := uci.New(e.Path)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	e.eng = eng
 	// initialize uci with new game
 	if err := e.eng.Run(uci.CmdUCI, uci.CmdIsReady, uci.CmdUCINewGame); err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 func (e *Engine) setColor(color chess.Color) {

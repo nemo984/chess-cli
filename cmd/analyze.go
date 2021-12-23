@@ -10,7 +10,7 @@ import (
 
 var analyzeCmd = &cobra.Command{
 	Use:   "analyze [game-names...]",
-	Short: "Get lichess analyze urls",
+	Short: "Get lichess analyze urls on your games",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one game name argument")

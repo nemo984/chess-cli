@@ -13,11 +13,8 @@ var gameDAO data.Game
 var rootCmd = &cobra.Command{
 	Use:   "chess-cli",
 	Short: "Play chess against computer inside your terminal",
-	Long: `Chess-cli is a CLI to play chess against an engine of your choice with the ability to specify depth and nodes
+	Long: `Chess-cli is a CLI to play chess against an UCI engine of your choice with the ability to specify depth
 	`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -30,5 +27,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

@@ -3,7 +3,6 @@ package chess
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -38,19 +37,18 @@ func NewGame(engine Engine, name string, color string) {
 	startGame(playees, player, engine)
 }
 
-func ContinueGame(name string) {
+func ContinueGame(name string) error {
 	game, ok := gameDAO.GetByName(name)
 	if !ok {
-		fmt.Printf("Game \"%v\" doesn't exist", name)
-		os.Exit(0)
+		return fmt.Errorf("game \"%v\" doesn't exist", name)
 	}
 	if c := GameContinuable(game); !c {
-		os.Exit(0)
+		return fmt.Errorf("game \"%v\" isn't continuable", name)
 	}
 
 	fen, err := chess.FEN(game.FEN)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 	Game = chess.NewGame(fen)
 	_gameName = game.GameName
@@ -63,10 +61,13 @@ func ContinueGame(name string) {
 		Depth: game.EngineDepth,
 		Color: utils.StrColor(game.EngineColor),
 	}
-	engine.setUp()
+	err = engine.setUp()
+	if err != nil {
+		return err
+	}
 
 	startGame(setUpTurn(utils.StrColor(game.ColorTurn), player, engine), player, engine)
-
+	return nil
 }
 
 func setUpTurn(colorTurn chess.Color, player Player, engine Engine) []playee {
