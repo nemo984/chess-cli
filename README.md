@@ -1,6 +1,18 @@
 # chess-cli
 chess-cli is a cli for playing chess against an uci compatible engine written in go
 
+> Note: Chess pieces are in unicode, so the color may seem swapped.
+# Table of Contents
+- [Usage](#usage)
+- [Examples](#examples)
+  * [Playing against an engine](#playing-against-an-engine)
+  * [List games](#list-games)
+  * [Resign games](#resign-games)
+  * [Delete games](#delete-games)
+  * [Get lichess analysis url for games](#get-lichess-analysis-url-for-games)
+  * [Play a daily puzzle from lichess](#play-a-daily-puzzle-from-lichess)
+
+
 ## Usage
 
     $ chess-cli --help
@@ -34,10 +46,11 @@ chess-cli is a cli for playing chess against an uci compatible engine written in
               --color string   choose your color: white/black (default random)
           -d, --depth int      Set the engine depth to search x piles only (default 3)
           -h, --help           help for engine
-              --name string    Set the name of the game (default random)
+     --name string    Set the name of the game (default random)
           -p, --path string    Set the UCI chess engine path (required)
-  #### Example:
+
     $ chess-cli play engine -p "D:\Programming\stockfish.exe" --depth 5 --color white
+![play](https://user-images.githubusercontent.com/52666539/147264682-e4452e23-2eb1-47ce-bd0f-042f6eb30dfe.png)
 
 ### List games 
     $ chess-cli list --help
@@ -50,7 +63,8 @@ chess-cli is a cli for playing chess against an uci compatible engine written in
         -a, --all      show all games with board
         -e, --engine   show games' engine configuration
         -h, --help     help for list
-        
+![list](https://user-images.githubusercontent.com/52666539/147264967-1979c283-a887-4f2b-a4bd-c1c43e2e013b.png)
+ 
 
 ### Resign games
     $ chess-cli resign --help
@@ -109,4 +123,6 @@ chess-cli is a cli for playing chess against an uci compatible engine written in
 
       Flags:
         -h, --help   help for puzzle
-
+![puzzle](https://user-images.githubusercontent.com/52666539/147265313-466e3fc5-9c56-42e3-9bbe-87ba7277eb75.png)
+![puzzle2](https://user-images.githubusercontent.com/52666539/147265363-fdfb6d0b-b3fe-40e0-b650-90f703294973.png)
+![puzzle3](https://user-images.githubusercontent.com/52666539/147265433-0d68c2fc-5d42-48bd-9247-6dbb91d9cd47.png)
