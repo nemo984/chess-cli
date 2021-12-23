@@ -1,5 +1,5 @@
 # chess-cli
-chess-cli is a cli for playing chess against an uci compatible engine written in go
+chess-cli is a cli for playing chess against an [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible engine written in go
 
 > Note: Chess pieces are in unicode, so the color may seem swapped.
 # Table of Contents
@@ -46,7 +46,7 @@ chess-cli is a cli for playing chess against an uci compatible engine written in
               --color string   choose your color: white/black (default random)
           -d, --depth int      Set the engine depth to search x piles only (default 3)
           -h, --help           help for engine
-     --name string    Set the name of the game (default random)
+              --name string    Set the name of the game (default random)
           -p, --path string    Set the UCI chess engine path (required)
 
     $ chess-cli play engine -p "D:\Programming\stockfish.exe" --depth 5 --color white
