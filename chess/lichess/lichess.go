@@ -11,7 +11,10 @@ import (
 func AnalysisURL(pgn string) (string, error) {
 	url := "https://lichess.org/api/import"
 	values := map[string]string{"pgn": strings.TrimSpace(pgn)}
-	jsonValue, _ := json.Marshal(values)
+	jsonValue, err := json.Marshal(values)
+	if err != nil {
+		return "", err
+	}
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
 	if err != nil {
 		return "", err

@@ -11,7 +11,7 @@ import (
 
 var resignCmd = &cobra.Command{
 	Use:   "resign [game-names...]",
-	Short: "resign on your chess games",
+	Short: "Resign on your chess games",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires at least one game name argument")

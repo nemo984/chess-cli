@@ -15,7 +15,6 @@ type Game struct {
 	ColorTurn   string `db:"colorTurn"`
 	Engine      string `db:"engine"`
 	EngineDepth int    `db:"engineDepth"`
-	EngineNodes int    `db:"engineNodes"`
 	Outcome     string `db:"outcome"`
 	Method      string `db:"method"`
 	FEN         string `db:"fen"`

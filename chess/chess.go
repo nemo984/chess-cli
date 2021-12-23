@@ -61,7 +61,6 @@ func ContinueGame(name string) {
 	engine := Engine{
 		Path:  game.Engine,
 		Depth: game.EngineDepth,
-		Nodes: game.EngineNodes,
 		Color: utils.StrColor(game.EngineColor),
 	}
 	engine.setUp()
@@ -100,7 +99,7 @@ func startGame(playees []playee, player Player, engine Engine) {
 				} else {
 					method = Game.Method().String()
 				}
-				fmt.Println("Game Status: ", Game.Outcome(), method)
+				fmt.Println("Game Status:", Game.Outcome(), method)
 
 				if save {
 					_, exists := gameDAO.GetByName(_gameName)
@@ -126,7 +125,6 @@ func saveGame(player Player, engine Engine, update bool) error {
 		ColorTurn:   utils.ColorStr(Game.Position().Turn()),
 		Engine:      engine.Path,
 		EngineDepth: engine.Depth,
-		EngineNodes: engine.Nodes,
 		Outcome:     Game.Outcome().String(),
 		Method:      Game.Method().String(),
 		FEN:         Game.FEN(),
@@ -178,6 +176,11 @@ func StartPuzzle() error {
 	uci := chess.UCINotation{}
 
 	fmt.Println("Daily Puzzle started, Rating:", rating)
+	if player.Color == chess.White {
+		fmt.Println("White to Move")
+	} else {
+		fmt.Println("Black to Move")
+	}
 	fmt.Println(board.DrawP(player.Color))
 	var next bool
 	for i := 0; i < len(solution); i++ {

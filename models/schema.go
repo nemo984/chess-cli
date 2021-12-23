@@ -8,7 +8,6 @@ var GameSchema = `CREATE TABLE IF NOT EXISTS games (
 	colorTurn TEXT,
 	engine TEXT,
 	engineDepth INT,
-	engineNodes INT,
 	outcome TEXT,
 	method TEXT,
 	fen TEXT,

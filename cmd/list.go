@@ -51,13 +51,13 @@ func displayGamesEngine(listAll bool) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetStyle(table.StyleLight)
-	t.AppendHeader(table.Row{"Game Name", "Engine Path", "Depth", "Nodes"})
+	t.AppendHeader(table.Row{"Game Name", "Engine Path", "Depth"})
 	for _, game := range games {
 		method := game.Method
 		if c := strings.Compare(method, "NoMethod"); c != 0 && !listAll {
 			continue
 		}
-		t.AppendRow(table.Row{game.GameName, game.Engine, game.EngineDepth, game.EngineNodes})
+		t.AppendRow(table.Row{game.GameName, game.Engine, game.EngineDepth})
 		t.AppendSeparator()
 	}
 	t.Render()
@@ -88,9 +88,9 @@ func displayGames(listAll bool) {
 			log.Fatal(err.Error())
 		}
 		g := chess.NewGame(fen)
-		board := c.Board{g.Position().Board()}
+		board := c.Board{Board: g.Position().Board()}
 		lastPlayed := utils.GetLastPlayed(game.Updated)
-		//, filepath.Base(game.Engine)
+
 		t.AppendRow(table.Row{lastPlayed, game.GameName, game.Color, game.ColorTurn, game.Outcome, method, board.DrawP(utils.StrColor(game.Color))})
 		t.AppendSeparator()
 	}

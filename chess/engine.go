@@ -11,7 +11,6 @@ import (
 type Engine struct {
 	Path  string
 	eng   *uci.Engine
-	Nodes int
 	Depth int
 	Color chess.Color
 }
@@ -34,7 +33,7 @@ func (e *Engine) setColor(color chess.Color) {
 
 func (e Engine) getMoveAndMove(options string) (exit bool, save bool) {
 	cmdPos := uci.CmdPosition{Position: Game.Position()}
-	cmdGo := uci.CmdGo{Depth: e.Depth, Nodes: e.Nodes}
+	cmdGo := uci.CmdGo{Depth: e.Depth}
 
 	if err := e.eng.Run(cmdPos, cmdGo); err != nil {
 		log.Fatal(err)
