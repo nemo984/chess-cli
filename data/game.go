@@ -11,10 +11,10 @@ import (
 	"github.com/nemo984/chess-cli/models"
 )
 
-var _db *sqlx.DB;
+var _db *sqlx.DB
 
 func OpenDatabase() error {
-	var err error;
+	var err error
 
 	_db, err = sqlx.Open("sqlite3", "./sqlite-database.db")
 	if err != nil {
@@ -25,7 +25,7 @@ func OpenDatabase() error {
 
 //Create a Table with GameSchema
 func CreateTable() {
-	statement, err :=  _db.Prepare(models.GameSchema)
+	statement, err := _db.Prepare(models.GameSchema)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -34,7 +34,6 @@ func CreateTable() {
 
 //Game manages Game CRUD
 type Game struct {
-
 }
 
 //Inserts a new Game into database
@@ -48,30 +47,30 @@ func (g *Game) Insert(game *models.Game) error {
 
 //Update updates an existing Game
 func (g *Game) Update(game models.Game) error {
-	_,err := _db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
+	_, err := _db.NamedExec(`UPDATE games SET gameName=:gameName, color=:color,engineColor=:engineColor,
 				colorTurn=:colorTurn, engine=:engine, engineDepth=:engineDepth, engineNodes=:engineNodes,
 				outcome=:outcome, method=:method, fen=:fen, pgn=:pgn, updated=:updated WHERE gameName =:gameName`, game)
 	return err
-} 
+}
 
 //GetByName find a Game by name - bool true if game exists
-func (g *Game) GetByName(name string) (models.Game,bool) {
+func (g *Game) GetByName(name string) (models.Game, bool) {
 	var game models.Game
-	err := _db.Get(&game,"SELECT * FROM games WHERE gameName = ? LIMIT 1",name)
+	err := _db.Get(&game, "SELECT * FROM games WHERE gameName = ? LIMIT 1", name)
 	if err != nil || err == sql.ErrNoRows {
-		return game,false
+		return game, false
 	}
-	return game,true
+	return game, true
 }
 
 //GetAll gets the list of Game
-func (g *Game) GetAll() ([]models.Game,error) {
+func (g *Game) GetAll() ([]models.Game, error) {
 	games := []models.Game{}
 	err := _db.Select(&games, "SELECT * FROM games ORDER BY updated DESC")
 	if err != nil {
 		return nil, err
 	}
-	return games,nil
+	return games, nil
 }
 
 //Delete deletes a Game by Name
@@ -81,12 +80,12 @@ func (g *Game) DeleteByName(name string) error {
 		return err
 	}
 
-	count, err := res.RowsAffected()  
+	count, err := res.RowsAffected()
 	if err != nil {
 		return err
 	}
 	if count == 0 {
-		return fmt.Errorf("Game \"%v\" doesn't exist",name)
+		return fmt.Errorf("Game \"%v\" doesn't exist", name)
 	}
 	return nil
 }

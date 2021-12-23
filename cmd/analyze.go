@@ -1,7 +1,3 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -28,7 +24,7 @@ var analyzeCmd = &cobra.Command{
 				fmt.Printf("Game \"%v\" doesn't exist.\n", name)
 				continue
 			}
-			url,err := lichess.AnalysisURL(game.PGN) 
+			url, err := lichess.AnalysisURL(game.PGN)
 			fmt.Printf("Analyze Game \"%v\" on lichess: ", name)
 			if err != nil {
 				fmt.Println("Can't get link,", err.Error())

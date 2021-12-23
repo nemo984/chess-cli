@@ -19,9 +19,9 @@ func (p Player) getMoveAndMove(options string) (exit bool, save bool) {
 		switch input {
 		case "?":
 			fmt.Println(options)
-		
+
 		case "v":
-			fmt.Println("Valid Moves:",Game.ValidMoves())
+			fmt.Println("Valid Moves:", Game.ValidMoves())
 
 		case "r":
 			moves := Game.ValidMoves()

@@ -1,7 +1,3 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
@@ -18,7 +14,7 @@ var puzzleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := chess.StartPuzzle()
 		if err != nil {
-			fmt.Println("Error:",err.Error())
+			fmt.Println("Error:", err.Error())
 		}
 	},
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/notnil/chess"
 )
 
-
 type Game struct {
 	Id          int    `db:"id"`
 	GameName    string `db:"gameName"`
@@ -26,7 +25,7 @@ type Game struct {
 }
 
 func (g *Game) Resign() {
-	fen,err := chess.FEN(g.FEN)
+	fen, err := chess.FEN(g.FEN)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

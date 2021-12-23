@@ -171,31 +171,31 @@ func StartPuzzle() error {
 	rating := puzzle.Puzzle.Rating
 	Game = chess.NewGame(new)
 	player := Player{Game.Position().Turn()}
-	
+
 	board := Board{Game.Position().Board()}
 
 	g := chess.AlgebraicNotation{}
 	uci := chess.UCINotation{}
 
-	fmt.Println("Daily Puzzle started, Rating:",rating)
+	fmt.Println("Daily Puzzle started, Rating:", rating)
 	fmt.Println(board.DrawP(player.Color))
-	var next bool 
+	var next bool
 	for i := 0; i < len(solution); i++ {
 		for !next {
 			move := player.getMove()
 			switch move {
 			case "?":
 				fmt.Println(PuzzleGameOptions)
-			
+
 			case "h":
 				fmt.Printf("Hint: %v piece\n", solution[i][:2])
-			
+
 			case "s":
-				fmt.Println("Solution/Remaining Moves:",solution[i:])
+				fmt.Println("Solution/Remaining Moves:", solution[i:])
 
 			case "q":
 				os.Exit(0)
-			
+
 			default:
 				moveSol, err := uci.Decode(Game.Position(), solution[i])
 				if err != nil {
@@ -214,11 +214,11 @@ func StartPuzzle() error {
 						fmt.Println("Incorrect Move, Try Again")
 					}
 				}
-					
+
 			}
 		}
 
-		if i + 1 >= len(solution) {
+		if i+1 >= len(solution) {
 			fmt.Println("Daily puzzle solved.")
 			os.Exit(0)
 		}
@@ -226,13 +226,13 @@ func StartPuzzle() error {
 		fmt.Println("Correct Move, Continue:", solution[i+1])
 		moveSol, err := uci.Decode(Game.Position(), solution[i+1])
 		if err != nil {
-			fmt.Println("Solution/Remaining Moves:",solution[i+1:])
-			return fmt.Errorf("can't decode lichess next move\n%v",err)
+			fmt.Println("Solution/Remaining Moves:", solution[i+1:])
+			return fmt.Errorf("can't decode lichess next move\n%v", err)
 		}
 		err = Game.Move(moveSol)
 		if err != nil {
-			fmt.Println("Solution/Remaining Moves:",solution[i+1:])
-			return fmt.Errorf("lichess next move is invalid \n%v",err)
+			fmt.Println("Solution/Remaining Moves:", solution[i+1:])
+			return fmt.Errorf("lichess next move is invalid \n%v", err)
 		}
 		board = Board{Game.Position().Board()}
 		fmt.Println(board.DrawP(player.Color))

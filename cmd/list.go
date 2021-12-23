@@ -20,7 +20,7 @@ import (
 
 var (
 	all bool
-	e bool
+	e   bool
 
 	listCmd = &cobra.Command{
 		Use:   "list",
@@ -30,7 +30,7 @@ var (
 				displayGamesEngine(all)
 			} else {
 				displayGames(all)
-			} 
+			}
 
 		},
 	}
@@ -47,7 +47,6 @@ func displayGamesEngine(listAll bool) {
 	games, err := gameDAO.GetAll()
 	if err != nil {
 		fmt.Println("No games found")
-		return
 	}
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -57,7 +56,7 @@ func displayGamesEngine(listAll bool) {
 		method := game.Method
 		if c := strings.Compare(method, "NoMethod"); c != 0 && !listAll {
 			continue
-		} 
+		}
 		t.AppendRow(table.Row{game.GameName, game.Engine, game.EngineDepth, game.EngineNodes})
 		t.AppendSeparator()
 	}
@@ -68,13 +67,12 @@ func displayGames(listAll bool) {
 	games, err := gameDAO.GetAll()
 	if err != nil {
 		fmt.Println("No games found")
-		return
 	}
 
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetStyle(table.StyleLight)
-	t.AppendHeader(table.Row{"Last Played", "Name", "Color", "Turn","Result", "Method", "Board"})
+	t.AppendHeader(table.Row{"Last Played", "Name", "Color", "Turn", "Result", "Method", "Board"})
 	for _, game := range games {
 		method := game.Method
 		if c := strings.Compare(method, "NoMethod"); c == 0 {
