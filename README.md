@@ -15,7 +15,7 @@ chess-cli is a cli for playing chess against an [UCI](https://en.wikipedia.org/w
   * [Play a daily puzzle from lichess](#play-a-daily-puzzle-from-lichess)
 
 ## Installation
-    $ go install github.com/nemo984/chess-cli@latest
+    go install github.com/nemo984/chess-cli@latest
   UCI chess engine 
    e.g. [Stockfish](https://stockfishchess.org/)
 
