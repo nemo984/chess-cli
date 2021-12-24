@@ -2,7 +2,9 @@
 chess-cli is a cli for playing chess against an [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface) compatible engine written in go
 
 > Note: Chess pieces are in unicode, so the color may seem swapped.
+> Your color is always on the bottom of the board
 # Table of Contents
+- [Installation](#installation)
 - [Usage](#usage)
 - [Examples](#examples)
   * [Playing against an engine](#playing-against-an-engine)
@@ -12,6 +14,10 @@ chess-cli is a cli for playing chess against an [UCI](https://en.wikipedia.org/w
   * [Get lichess analysis url for games](#get-lichess-analysis-url-for-games)
   * [Play a daily puzzle from lichess](#play-a-daily-puzzle-from-lichess)
 
+## Installation
+    $ go install github.com/nemo984/chess-cli@latest
+  UCI chess engine 
+   e.g. [Stockfish](https://stockfishchess.org/)
 
 ## Usage
 
