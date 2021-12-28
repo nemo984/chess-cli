@@ -36,7 +36,8 @@ var (
 				rand.Seed(time.Now().UnixNano())
 				color = []string{"white", "black"}[rand.Intn(2)]
 			}
-			if err := chess.NewGame(engine, name, color); err != nil {
+			game := chess.NewChessGame(data.Game{}, name)
+			if err := game.NewEngineGame(engine, color); err != nil {
 				return err
 			}
 			return nil

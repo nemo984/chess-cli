@@ -9,68 +9,9 @@ import (
 )
 
 type Player struct {
-	Color chess.Color
+	Color       chess.Color
 	MoveOptions string
-	Out io.Writer
-}
-
-func (p Player) getMoveAndMove() (exit bool, save bool, err error) {
-	for {
-		move,err := p.getMove()
-		if err != nil {
-			return false,false,err
-		}
-		switch move {
-		case "v":
-			fmt.Fprintln(p.Out, "Valid Moves:", Game.ValidMoves())
-
-		case "r":
-			moves := Game.ValidMoves()
-			move := rand.Intn(len(moves))
-			if err := Game.Move(moves[move]); err != nil {
-				return false,false,err
-			}
-			fmt.Fprintln(p.Out, "Random move!:", moves[move])
-			return false, true, nil
-
-		case "q":
-			return true, true, nil
-
-		case "q!":
-			return true, false, nil
-
-		case "resign":
-			Game.Resign(p.Color)
-			return true, true, nil
-
-		default:
-			if err := Game.MoveStr(move); err != nil {
-				fmt.Fprintln(p.Out, "Invalid Move, Try Again")
-			} else {
-				fmt.Fprintln(p.Out, "You played: ", move)
-				return false, true, nil
-			}
-		}
-
-	}
-}
-
-func (p Player) getMove() (move string,err error) {
-	var input string
-	for {
-		fmt.Print("Your Move, Enter (?) for options: ")
-		if _,err := fmt.Scanln(&input); err != nil {
-			return "", err
-		}
-		switch input {
-		case "?":
-			fmt.Fprintln(p.Out, p.MoveOptions)
-			continue
-		}
-		break
-	}
-	return input, nil
-
+	Out         io.Writer
 }
 
 var (
@@ -87,3 +28,64 @@ var (
 	To quit, Enter (q)
 	`
 )
+
+
+func (p Player) getMoveAndMove(game *chess.Game) (exit bool, save bool, err error) {
+	for {
+		move, err := p.getMove()
+		if err != nil {
+			return false, false, err
+		}
+		switch move {
+		case "v":
+			fmt.Fprintln(p.Out, "Valid Moves:", game.ValidMoves())
+
+		case "r":
+			moves := game.ValidMoves()
+			move := rand.Intn(len(moves))
+			if err := game.Move(moves[move]); err != nil {
+				return false, false, err
+			}
+			fmt.Fprintln(p.Out, "Random move!:", moves[move])
+			return false, true, nil
+
+		case "q":
+			return true, true, nil
+
+		case "q!":
+			return true, false, nil
+
+		case "resign":
+			game.Resign(p.Color)
+			return true, true, nil
+
+		default:
+			if err := game.MoveStr(move); err != nil {
+				fmt.Fprintln(p.Out, "Invalid Move, Try Again")
+			} else {
+				fmt.Fprintln(p.Out, "You played: ", move)
+				return false, true, nil
+			}
+		}
+
+	}
+}
+
+func (p Player) getMove() (move string, err error) {
+	var input string
+	for {
+		fmt.Print("Your Move, Enter (?) for options: ")
+		if _, err := fmt.Scanln(&input); err != nil {
+			return "", err
+		}
+		switch input {
+		case "?":
+			fmt.Fprintln(p.Out, p.MoveOptions)
+			continue
+		}
+		break
+	}
+	return input, nil
+
+}
+

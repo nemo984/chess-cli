@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nemo984/chess-cli/chess"
+	"github.com/nemo984/chess-cli/data"
 	"github.com/spf13/cobra"
 )
 
@@ -12,8 +13,8 @@ var puzzleCmd = &cobra.Command{
 	Use:   "puzzle",
 	Short: "Play a daily lichess puzzle",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := chess.StartPuzzle()
-		if err != nil {
+		game := chess.NewChessGame(data.Game{}, "Puzzle")
+		if err := game.StartPuzzle(); err != nil {
 			fmt.Println("Error:", err.Error())
 		}
 	},

@@ -31,15 +31,15 @@ func (e *Engine) setColor(color chess.Color) {
 	e.Color = color
 }
 
-func (e Engine) getMoveAndMove() (exit bool, save bool, err error) {
-	cmdPos := uci.CmdPosition{Position: Game.Position()}
+func (e Engine) getMoveAndMove(game *chess.Game) (exit bool, save bool, err error) {
+	cmdPos := uci.CmdPosition{Position: game.Position()}
 	cmdGo := uci.CmdGo{Depth: e.Depth}
 
 	if err := e.eng.Run(cmdPos, cmdGo); err != nil {
 		return false, false, err
 	}
 	move := e.eng.SearchResults().BestMove
-	if err := Game.Move(move); err != nil {
+	if err := game.Move(move); err != nil {
 		return false, false, err
 	}
 	fmt.Println("Engine Move:", move)

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/nemo984/chess-cli/chess"
+	"github.com/nemo984/chess-cli/data"
 	"github.com/spf13/cobra"
 )
 
@@ -12,8 +13,11 @@ var (
 		Use:   "play",
 		Short: "Play/Continue a chess game",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := chess.ContinueGame(game)
-			return err
+			game := chess.NewChessGame(data.Game{}, game)
+			if err := game.ContinueGame(); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 )

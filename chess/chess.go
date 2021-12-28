@@ -16,75 +16,69 @@ import (
 
 type ChessGame struct {
 	Game *chess.Game
-	DB	data.Game
+	DB   data.Game
 	Name string
 }
 
-
-func NewChess(game *chess.Game, db data.Game, name string) *Chess {
-	return &ChessGame{Game: game, DB: db, Name: name}
+func NewChessGame(db data.Game, name string) *ChessGame {
+	return &ChessGame{Game: chess.NewGame(), DB: db, Name: name}
 }
-
-var (
-	Game      *chess.Game
-	gameDAO   data.Game
-	_gameName string
-)
 
 type playee interface {
-	getMoveAndMove() (exit bool, save bool, err error)
+	getMoveAndMove(game *chess.Game) (exit bool, save bool, err error)
 }
 
-func New(engine Engine, name string, color string) error {
-	Game = chess.NewGame()
-	_gameName = name
-	c := utils.StrColor(color)
-	player := Player{Color: c, MoveOptions: EngineGameOptions, Out: os.Stdout}
+func (c *ChessGame) NewEngineGame(engine Engine, color string) error {
+	player := Player{
+		Color:       utils.StrColor(color),
+		MoveOptions: EngineGameOptions,
+		Out:         os.Stdout,
+	}
 
 	if err := engine.setUp(); err != nil {
 		return err
 	}
-	engine.setColor(c.Other())
+	engine.setColor(player.Color.Other())
 
 	playees := setUpTurn(chess.White, player, engine)
-	if err := startGame(playees, player, engine); err != nil {
+	if err := c.startGame(playees, player, engine); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func ContinueGame(name string) error {
-	game, ok := gameDAO.GetByName(name)
+func (c *ChessGame) ContinueGame() error {
+	game, ok := c.DB.GetByName(c.Name)
 	if !ok {
-		return fmt.Errorf("game \"%v\" doesn't exist", name)
+		return fmt.Errorf("game \"%v\" doesn't exist", c.Name)
 	}
-	if c := GameContinuable(game); !c {
-		return fmt.Errorf("game \"%v\" isn't continuable", name)
+	if ok := GameContinuable(game); !ok {
+		return fmt.Errorf("game \"%v\" isn't continuable", c.Name)
 	}
 
 	fen, err := chess.FEN(game.FEN)
 	if err != nil {
 		return err
 	}
-	Game = chess.NewGame(fen)
-	_gameName = game.GameName
-
+	c.Game = chess.NewGame(fen)
+	
 	player := Player{
-		Color: utils.StrColor(game.Color),
+		Color:       utils.StrColor(game.Color),
+		MoveOptions: EngineGameOptions,
+		Out:         os.Stdout,
 	}
 	engine := Engine{
 		Path:  game.Engine,
 		Depth: game.EngineDepth,
-		Color: utils.StrColor(game.EngineColor),
+		Color: player.Color.Other(),
 	}
-	err = engine.setUp()
-	if err != nil {
+	if err = engine.setUp(); err != nil {
 		return err
 	}
 
 	turns := setUpTurn(utils.StrColor(game.ColorTurn), player, engine)
-	if err := startGame(turns, player, engine); err != nil {
+	if err := c.startGame(turns, player, engine); err != nil {
 		return err
 	}
 	return nil
@@ -101,37 +95,37 @@ func setUpTurn(colorTurn chess.Color, player Player, engine Engine) []playee {
 	return playees
 }
 
-func startGame(playees []playee, player Player, engine Engine) error {
-	board := Board{Game.Position().Board()}
+func (c *ChessGame) startGame(playees []playee, player Player, engine Engine) error {
+	board := Board{c.Game.Position().Board()}
 	fmt.Println(board.DrawP(player.Color))
 
-	for Game.Outcome() == chess.NoOutcome {
+	for c.Game.Outcome() == chess.NoOutcome {
 		for _, playee := range playees {
-			exit, save, err := playee.getMoveAndMove()
+			exit, save, err := playee.getMoveAndMove(c.Game)
 			if err != nil {
 				return err
 			}
 			if !exit {
-				board := Board{Game.Position().Board()}
+				board := Board{c.Game.Position().Board()}
 				fmt.Println(board.DrawP(player.Color))
 			}
 
-			if exit || Game.Outcome() != chess.NoOutcome {
+			if exit || c.Game.Outcome() != chess.NoOutcome {
 				var method string
-				if Game.Method() == chess.NoMethod {
+				if c.Game.Method() == chess.NoMethod {
 					method = "Undecided"
 				} else {
-					method = Game.Method().String()
+					method = c.Game.Method().String()
 				}
-				fmt.Println("Game Status:", Game.Outcome(), method)
+				fmt.Println("Game Status:", c.Game.Outcome(), method)
 
 				if save {
-					_, exists := gameDAO.GetByName(_gameName)
-					if err := saveGame(player, engine, exists); err != nil {
-						return fmt.Errorf("error at saving game: %w",err)
+					_, exists := c.DB.GetByName(c.Name)
+					if err := c.saveGame(player, engine, exists); err != nil {
+						return fmt.Errorf("error at saving game: %w", err)
 					}
 
-					fmt.Printf("Game \"%v\" Saved", _gameName)
+					fmt.Printf("Game \"%v\" Saved", c.Name)
 				}
 				os.Exit(0)
 			}
@@ -141,45 +135,30 @@ func startGame(playees []playee, player Player, engine Engine) error {
 	return nil
 }
 
-func saveGame(player Player, engine Engine, update bool) error {
+func (c *ChessGame) saveGame(player Player, engine Engine, update bool) error {
 	game := models.Game{
 		Color:       utils.ColorStr(player.Color),
-		GameName:    _gameName,
+		GameName:    c.Name,
 		EngineColor: utils.ColorStr(engine.Color),
-		ColorTurn:   utils.ColorStr(Game.Position().Turn()),
+		ColorTurn:   utils.ColorStr(c.Game.Position().Turn()),
 		Engine:      engine.Path,
 		EngineDepth: engine.Depth,
-		Outcome:     Game.Outcome().String(),
-		Method:      Game.Method().String(),
-		FEN:         Game.FEN(),
-		PGN:         Game.String(),
+		Outcome:     c.Game.Outcome().String(),
+		Method:      c.Game.Method().String(),
+		FEN:         c.Game.FEN(),
+		PGN:         c.Game.String(),
 		Updated:     time.Now().Format(time.RFC3339),
 	}
 	var err error
 	if update {
-		err = gameDAO.Update(game)
+		err = c.DB.Update(game)
 	} else {
-		err = gameDAO.Insert(&game)
+		err = c.DB.Insert(&game)
 	}
 	return err
 }
 
-func GameContinuable(game models.Game) bool {
-	if game.Outcome != chess.NoOutcome.String() {
-		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n", game.GameName, game.Outcome, game.Method)
-		URL, err := lichess.AnalysisURL(game.PGN)
-		fmt.Print("Analyze on lichess: ")
-		if err != nil {
-			fmt.Println("Can't get link,", err.Error())
-		} else {
-			fmt.Println(URL)
-		}
-		return false
-	}
-	return true
-}
-
-func StartPuzzle() error {
+func (c *ChessGame) StartPuzzle() error {
 	puzzle, err := lichess.GetPuzzle()
 	if err != nil {
 		return err
@@ -191,10 +170,14 @@ func StartPuzzle() error {
 	}
 	solution := puzzle.Puzzle.Solution
 	rating := puzzle.Puzzle.Rating
-	Game = chess.NewGame(new)
-	player := Player{Color: Game.Position().Turn(), MoveOptions: PuzzleGameOptions, Out: os.Stdout}
+	c.Game = chess.NewGame(new)
+	player := Player{
+		Color:       c.Game.Position().Turn(),
+		MoveOptions: PuzzleGameOptions,
+		Out:         os.Stdout,
+	}
 
-	board := Board{Game.Position().Board()}
+	board := Board{c.Game.Position().Board()}
 
 	g := chess.AlgebraicNotation{}
 	uci := chess.UCINotation{}
@@ -209,7 +192,7 @@ func StartPuzzle() error {
 	next := false
 	for i := 0; i < len(solution); i++ {
 		for !next {
-			move,err := player.getMove()
+			move, err := player.getMove()
 			if err != nil {
 				return err
 			}
@@ -224,19 +207,19 @@ func StartPuzzle() error {
 				os.Exit(0)
 
 			default:
-				moveSol, err := uci.Decode(Game.Position(), solution[i])
+				moveSol, err := uci.Decode(c.Game.Position(), solution[i])
 				if err != nil {
 					return errors.New("can't decode lichess move solution")
 				}
-				input, err := g.Decode(Game.Position(), move)
+				input, err := g.Decode(c.Game.Position(), move)
 				if err != nil {
 					fmt.Println("Not valid move")
 				} else {
 					if moveSol.S1() == input.S1() && moveSol.S2() == input.S2() {
-						if err := Game.Move(input); err != nil {
+						if err := c.Game.Move(input); err != nil {
 							return err
 						}
-						board = Board{Game.Position().Board()}
+						board = Board{c.Game.Position().Board()}
 						fmt.Println(board.DrawP(player.Color))
 						next = true
 					} else {
@@ -253,23 +236,38 @@ func StartPuzzle() error {
 		}
 
 		fmt.Println("Correct Move, Continue:", solution[i+1])
-		moveSol, err := uci.Decode(Game.Position(), solution[i+1])
+		moveSol, err := uci.Decode(c.Game.Position(), solution[i+1])
 		if err != nil {
 			fmt.Println("Solution/Remaining Moves:", solution[i+1:])
 			return fmt.Errorf("can't decode lichess next move\n%v", err)
 		}
-		err = Game.Move(moveSol)
+		err = c.Game.Move(moveSol)
 		if err != nil {
 			fmt.Println("Solution/Remaining Moves:", solution[i+1:])
 			return fmt.Errorf("lichess next move is invalid \n%v", err)
 		}
-		board = Board{Game.Position().Board()}
+		board = Board{c.Game.Position().Board()}
 		fmt.Println(board.DrawP(player.Color))
 		i++
 		next = false
 	}
 
 	return nil
+}
+
+func GameContinuable(game models.Game) bool {
+	if game.Outcome != chess.NoOutcome.String() {
+		fmt.Printf("Game \"%v\" isn't continuable, Status: %v %v\n", game.GameName, game.Outcome, game.Method)
+		URL, err := lichess.AnalysisURL(game.PGN)
+		fmt.Print("Analyze on lichess: ")
+		if err != nil {
+			fmt.Println("Can't get link,", err.Error())
+		} else {
+			fmt.Println(URL)
+		}
+		return false
+	}
+	return true
 }
 
 type Board struct {
