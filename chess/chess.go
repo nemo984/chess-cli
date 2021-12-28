@@ -62,7 +62,7 @@ func (c *ChessGame) ContinueGame() error {
 		return err
 	}
 	c.Game = chess.NewGame(fen)
-	
+
 	player := Player{
 		Color:       utils.StrColor(game.Color),
 		MoveOptions: EngineGameOptions,

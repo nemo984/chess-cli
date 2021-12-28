@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/nemo984/chess-cli/chess"
 	"github.com/spf13/cobra"
@@ -31,9 +30,9 @@ var resignCmd = &cobra.Command{
 			}
 
 			game.Resign()
-			err := gameDAO.Update(game)
-			if err != nil {
-				log.Fatal(err.Error())
+			if err := gameDAO.Update(game); err != nil {
+				fmt.Printf("Error at resigning game \"%v\": %s\n", name, err.Error())
+				continue
 			}
 			fmt.Printf("You resigned on Game \"%v\" Status: %v, %v\n", game.GameName, game.Outcome, game.Method)
 		}

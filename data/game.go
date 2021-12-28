@@ -28,7 +28,7 @@ func CreateTable() error {
 	if err != nil {
 		return err
 	}
-	if _,err := statement.Exec(); err != nil {
+	if _, err := statement.Exec(); err != nil {
 		return err
 	}
 	return nil

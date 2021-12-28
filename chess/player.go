@@ -29,7 +29,6 @@ var (
 	`
 )
 
-
 func (p Player) getMoveAndMove(game *chess.Game) (exit bool, save bool, err error) {
 	for {
 		move, err := p.getMove()
@@ -88,4 +87,3 @@ func (p Player) getMove() (move string, err error) {
 	return input, nil
 
 }
-

@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -24,10 +23,9 @@ var deleteCmd = &cobra.Command{
 				fmt.Printf("Game \"%v\" doesn't exist.\n", name)
 				continue
 			}
-			err := gameDAO.DeleteByName(name)
-			if err != nil {
-				fmt.Println(err.Error())
-				os.Exit(0)
+			if err := gameDAO.DeleteByName(name); err != nil {
+				fmt.Printf("Error at deleting game \"%v\": %s\n", name, err.Error())
+				continue
 			}
 			fmt.Printf("Game \"%v\" is deleted.\n", name)
 		}
