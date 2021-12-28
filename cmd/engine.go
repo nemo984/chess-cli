@@ -19,24 +19,27 @@ var (
 	engineCmd = &cobra.Command{
 		Use:   "engine",
 		Short: "Start a game against an engine",
-		Run: func(cmd *cobra.Command, args []string) {
-			data.CreateTable()
-
-			if name == "" {
-				name = utils.RandStringRunes(5)
-			} else {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := data.CreateTable(); err != nil {
+				return err
+			}
+			if name != "" {
 				_, ok := gameDAO.GetByName(name)
 				if ok {
-					fmt.Printf("Game \"%v\" already exists\n", name)
-					return
+					return fmt.Errorf("game \"%v\" already exists", name)
 				}
+			} else {
+				name = utils.RandStringRunes(5)
 			}
 
 			if color == "" {
 				rand.Seed(time.Now().UnixNano())
 				color = []string{"white", "black"}[rand.Intn(2)]
 			}
-			chess.NewGame(engine, name, color)
+			if err := chess.NewGame(engine, name, color); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 )

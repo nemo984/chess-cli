@@ -3,7 +3,6 @@ package data
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -24,12 +23,15 @@ func OpenDatabase() error {
 }
 
 //Create a Table with GameSchema
-func CreateTable() {
+func CreateTable() error {
 	statement, err := _db.Prepare(models.GameSchema)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
-	statement.Exec()
+	if _,err := statement.Exec(); err != nil {
+		return err
+	}
+	return nil
 }
 
 //Game manages Game CRUD

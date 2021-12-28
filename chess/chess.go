@@ -14,6 +14,17 @@ import (
 	"github.com/notnil/chess"
 )
 
+type ChessGame struct {
+	Game *chess.Game
+	DB	data.Game
+	Name string
+}
+
+
+func NewChess(game *chess.Game, db data.Game, name string) *Chess {
+	return &ChessGame{Game: game, DB: db, Name: name}
+}
+
 var (
 	Game      *chess.Game
 	gameDAO   data.Game
@@ -21,20 +32,26 @@ var (
 )
 
 type playee interface {
-	getMoveAndMove(options string) (exit bool, save bool)
+	getMoveAndMove() (exit bool, save bool, err error)
 }
 
-func NewGame(engine Engine, name string, color string) {
+func New(engine Engine, name string, color string) error {
 	Game = chess.NewGame()
 	_gameName = name
 	c := utils.StrColor(color)
-	player := Player{c}
+	player := Player{Color: c, MoveOptions: EngineGameOptions, Out: os.Stdout}
 
-	engine.setUp()
+	if err := engine.setUp(); err != nil {
+		return err
+	}
 	engine.setColor(c.Other())
 
 	playees := setUpTurn(chess.White, player, engine)
-	startGame(playees, player, engine)
+	if err := startGame(playees, player, engine); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ContinueGame(name string) error {
@@ -66,7 +83,10 @@ func ContinueGame(name string) error {
 		return err
 	}
 
-	startGame(setUpTurn(utils.StrColor(game.ColorTurn), player, engine), player, engine)
+	turns := setUpTurn(utils.StrColor(game.ColorTurn), player, engine)
+	if err := startGame(turns, player, engine); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -81,13 +101,16 @@ func setUpTurn(colorTurn chess.Color, player Player, engine Engine) []playee {
 	return playees
 }
 
-func startGame(playees []playee, player Player, engine Engine) {
+func startGame(playees []playee, player Player, engine Engine) error {
 	board := Board{Game.Position().Board()}
 	fmt.Println(board.DrawP(player.Color))
 
 	for Game.Outcome() == chess.NoOutcome {
 		for _, playee := range playees {
-			exit, save := playee.getMoveAndMove(EngineGameOptions)
+			exit, save, err := playee.getMoveAndMove()
+			if err != nil {
+				return err
+			}
 			if !exit {
 				board := Board{Game.Position().Board()}
 				fmt.Println(board.DrawP(player.Color))
@@ -104,11 +127,10 @@ func startGame(playees []playee, player Player, engine Engine) {
 
 				if save {
 					_, exists := gameDAO.GetByName(_gameName)
-					err := saveGame(player, engine, exists)
-					if err != nil {
-						fmt.Println("Error at saving game:", err.Error())
-						os.Exit(1)
+					if err := saveGame(player, engine, exists); err != nil {
+						return fmt.Errorf("error at saving game: %w",err)
 					}
+
 					fmt.Printf("Game \"%v\" Saved", _gameName)
 				}
 				os.Exit(0)
@@ -116,6 +138,7 @@ func startGame(playees []playee, player Player, engine Engine) {
 		}
 
 	}
+	return nil
 }
 
 func saveGame(player Player, engine Engine, update bool) error {
@@ -169,7 +192,7 @@ func StartPuzzle() error {
 	solution := puzzle.Puzzle.Solution
 	rating := puzzle.Puzzle.Rating
 	Game = chess.NewGame(new)
-	player := Player{Game.Position().Turn()}
+	player := Player{Color: Game.Position().Turn(), MoveOptions: PuzzleGameOptions, Out: os.Stdout}
 
 	board := Board{Game.Position().Board()}
 
@@ -183,14 +206,14 @@ func StartPuzzle() error {
 		fmt.Println("Black to Move")
 	}
 	fmt.Println(board.DrawP(player.Color))
-	var next bool
+	next := false
 	for i := 0; i < len(solution); i++ {
 		for !next {
-			move := player.getMove()
+			move,err := player.getMove()
+			if err != nil {
+				return err
+			}
 			switch move {
-			case "?":
-				fmt.Println(PuzzleGameOptions)
-
 			case "h":
 				fmt.Printf("Hint: %v piece\n", solution[i][:2])
 
@@ -210,7 +233,9 @@ func StartPuzzle() error {
 					fmt.Println("Not valid move")
 				} else {
 					if moveSol.S1() == input.S1() && moveSol.S2() == input.S2() {
-						Game.Move(input)
+						if err := Game.Move(input); err != nil {
+							return err
+						}
 						board = Board{Game.Position().Board()}
 						fmt.Println(board.DrawP(player.Color))
 						next = true

@@ -2,7 +2,6 @@ package chess
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/notnil/chess"
 	"github.com/notnil/chess/uci"
@@ -32,18 +31,17 @@ func (e *Engine) setColor(color chess.Color) {
 	e.Color = color
 }
 
-func (e Engine) getMoveAndMove(options string) (exit bool, save bool) {
+func (e Engine) getMoveAndMove() (exit bool, save bool, err error) {
 	cmdPos := uci.CmdPosition{Position: Game.Position()}
 	cmdGo := uci.CmdGo{Depth: e.Depth}
 
 	if err := e.eng.Run(cmdPos, cmdGo); err != nil {
-		log.Fatal(err)
+		return false, false, err
 	}
-
 	move := e.eng.SearchResults().BestMove
 	if err := Game.Move(move); err != nil {
-		log.Fatal(err)
+		return false, false, err
 	}
 	fmt.Println("Engine Move:", move)
-	return false, true
+	return false, true, nil
 }
